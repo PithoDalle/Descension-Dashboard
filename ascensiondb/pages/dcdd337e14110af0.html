@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>How to Import WeakAuras - Guides - Ascension Database</title>
+
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--    <meta name="viewport" content="width=1350px, initial-scale=1">-->
+
+    <!-- Primary Meta Tags -->
+    <title>How to Import WeakAuras - Guides - Ascension Database</title>
+    <meta name="description" content="This is a short guide on how to Import WeakAuras from the Ascension DB to your game. Its a quick and easy process.">
+    <meta name="title" content="How to Import WeakAuras - Guides - Ascension Database">
+    <meta property="og:title" content="How to Import WeakAuras - Guides - Ascension Database">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Ascension Database">
+    <meta property="og:url" content="https://db.ascension.gg/">
+    <meta property="og:description" content="This is a short guide on how to Import WeakAuras from the Ascension DB to your game. Its a quick and easy process.">
+    <meta property="og:image" content="/ascensiondb/static/images/logos/metasmall.jpg">
+    <meta name="twitter:card" content="summary">
+
+
+    <link rel="SHORTCUT ICON" href="/ascensiondb/static/images/logos/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="/ascensiondb/static/css/jquery.multiselect.css?451" />
+    <link rel="stylesheet" type="text/css" href="/ascensiondb/static/css/toastify.min.css?451" />
+    <link rel="search" type="application/opensearchdescription+xml" href="/ascensiondb/static/download/searchplugins/aowow.xml" title="Ascension DB" />
+    <link rel="stylesheet" type="text/css" href="/ascensiondb/static/css/basic.css?451" />
+    <link rel="stylesheet" type="text/css" href="/ascensiondb/static/css/global.css?451" />
+    <link rel="stylesheet" type="text/css" href="/ascensiondb/static/css/aowow.css?451" />
+    <link rel="stylesheet" type="text/css" href="/ascensiondb/static/css/locale_enus.css?451" />
+    <link rel="stylesheet" type="text/css" href="/ascensiondb/static/css/atom-one-dark.css?451" />
+    <link rel="stylesheet" type="text/css" href="/ascensiondb/static/css/nprogress.css?451" />
+
+    <link href="/ascensiondb/static/css/fontawesome/css/fontawesome.css" rel="stylesheet">
+    <link href="/ascensiondb/static/css/fontawesome/css/brands.css" rel="stylesheet">
+    <link href="/ascensiondb/static/css/fontawesome/css/regular.css" rel="stylesheet">
+    <link href="/ascensiondb/static/css/fontawesome/css/solid.css" rel="stylesheet">
+    <link href="/ascensiondb/static/css/quill.core.css" rel="stylesheet">
+    <link href="/ascensiondb/static/css/quill.snow.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="/ascensiondb/static/css/quill.imageUploader.min.css?451" />
+
+
+
+    <script type="text/javascript">
+        var g_serverTime = new Date('2023/05/19 22:19:24');
+        var g_staticUrl = "https://db.ascension.gg/static";
+        var g_host = "https://db.ascension.gg";
+
+        </script>
+
+    <script src="/ascensiondb/static/js/jquery-1.12.4.min.js" type="text/javascript"></script>
+    <script src="/ascensiondb/static/js/basic.js?451" type="text/javascript"></script>
+    <script src="/ascensiondb/static/widgets/power.js?451" type="text/javascript"></script>
+    <script src="/ascensiondb/static/js/locale_enus.js?451" type="text/javascript"></script>
+    <script src="/ascensiondb/static/js/global.js?451" type="text/javascript"></script>
+    <script src="/ascensiondb/static/js/locale.js?451" type="text/javascript"></script>
+    <script src="/ascensiondb/static/js/Markup.js?451" type="text/javascript"></script>
+    <script src="/ascensiondb/static/js/toastify.min.js?451" type="text/javascript"></script>
+    <script src="/ascensiondb/static/js/html2canvas.min.js"></script>
+    <script src="/ascensiondb/static/js/jquery.multiselect.js" type="text/javascript"></script>
+    <script src="/ascensiondb/static/js/jquery.serializejson.js"></script>
+    <script src="/ascensiondb/static/js/quill.core.js"></script>
+    <script src="/ascensiondb/static/js/quill.min.js"></script>
+    <script src="/ascensiondb/static/js/quill-resize-module.min.js"></script>
+    <script src="/ascensiondb/static/js/quill.imageUploader.min.js"></script>
+    <script src="/ascensiondb/static/js/nprogress.js"></script>
+
+
+
+        <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-FSCB8RS6LR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-FSCB8RS6LR');
+    </script>
+
+
+
+    
+
+
+
+
+
+
+    <script type="text/javascript">
+        var g_user = {"id":0,"name":"","roles":0,"permissions":0,"cookies":[]};
+
+
+
+    </script>
+</head>
+
+<body>
+<span class="background"></span>
+<div id="layers"></div>
+<div class="layout nosidebar" id="layout">
+
+    <div class="layout-inner" id="layout-inner">
+
+        <div class="header" id="header">
+            <div id="header-logo">
+<!--                <a class="header-logo" href="."></a>-->
+<!--                <h1>--><!--</h1>-->
+            </div>
+        </div>
+
+
+        <div id="wrapper" class="wrapper">
+            <div class="topbar" id="topbar">
+
+                <a href="/" class="topbar-logo"> </a>
+
+
+                <div class="topbar-search">
+                    <i class="fa-solid fa-magnifying-glass topbar-search-icon "></i>
+                    <form action="."><a href="javascript:;"></a><input name="search" size="35" id="livesearch-generic"
+                                                                       value=""/>
+                    </form>
+
+
+                </div>
+
+
+                <div class="toplinks linklist"><a class="topmenu" href="?account=signin"><i style="padding-right: 5px" class="fa-solid fa-user"></i>Log in / Register</a><!--<a href="javascript:;" id="toplinks-language">--><?//=Lang::main('language'); ?><!--</a>-->
+</div>
+            </div>
+            <div class="toptabs" id="toptabs">
+
+            </div>
+
+
+            <script type="text/javascript">
+                            </script>
+
+    <div class="main" id="main">
+        <div class="main-precontents" id="main-precontents"></div>
+        <div class="main-contents" id="main-contents">
+
+            <script type="text/javascript">//<![CDATA[
+                var lv_comments = [];
+                var g_pageInfo = {"name":"How to Import WeakAuras","author":"Paroxs"};
+                PageTemplate.set({"pageName":"guide","activeTab":6,"breadcrumb":[3,3]});
+                PageTemplate.init();
+            //]]>
+
+
+
+
+
+            </script>
+    <script>
+      NProgress.configure({ showSpinner: false });
+      window.addEventListener("beforeunload", function () {
+          NProgress.configure({ minimum: 0.1 });
+          NProgress.start();
+      });
+
+      window.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === 'hidden') {
+                sessionStorage.setItem("progressValue", NProgress.status);
+            }
+
+      });
+
+      window.addEventListener("DOMContentLoaded", function () {
+
+          if (sessionStorage.getItem("progressValue") != null) {
+              NProgress.configure({ minimum: sessionStorage.getItem("progressValue") });
+              NProgress.start();
+              NProgress.done();
+          }
+      });
+    </script>
+    <table class="infobox">
+        <tr><th id="infobox-quick-facts">Quick Facts</th></tr>
+        <tr><td>
+            <div class="infobox-spacer"></div>
+            <div id="infobox-contents0"></div>
+            <script type="text/javascript">
+                Markup.printHtml("[ul][li]Author: [url=?user=Paroxs]Paroxs[/url][/li][li]Added: [tooltip name=added]Wednesday, 18:29:57[/tooltip][span class=tip tooltip=added]2023/03/15[/span][/li][li]Views: [n5=5844][/li][/ul]", "infobox-contents0", { allow: Markup.CLASS_STAFF, dbpage: true });
+            </script>
+        </td></tr>
+    </table>
+
+            <div class="text">
+<a href="javascript:;" class="button-red" onclick="a = ContactTool.show.bind(ContactTool, {mode: 6, guide: 16}); a();"><em><span>Report</span></em></a><a href="?guide=changelog&id=16" class="button-red"><em><span>Changelog</span></em></a>
+                <h1>How to Import WeakAuras</h1>
+
+    <div style="width: 80%" id="article-generic" class="left"></div>
+    <script type="text/javascript">//<![CDATA[
+        Markup.printHtml("This is a quick guide on how to import WeakAuras.\r\n\r\n[h2]Importing WeakAuras[/h2]\r\n1. Make sure you have the WeakAura addon installed. \r\n[i]You can Install the WeakAura addon using the Ascension Launcher[/i]\r\n[img src=https://i.imgur.com/O3LLvcX.png]\r\n2. In-game, you can type[b] /wa[/b] to bring up the WeakAura interface.\r\n[img src=https://i.imgur.com/Tj5bmDp.png]\r\n3. The next step is to import an existing WeakAura, for this guide I\'ll be using the the Import string from [url=https://db.ascension.gg/?weakaura=60]Simple Combat  Timer[/url]\r\n[img src=https://i.imgur.com/y897WST.png]\r\nThe [b]Copy Import String[/b] button will automatically add the import string to your clipboard.\r\n\r\n4. In-game, you can now click on the Import button in the WeakAura interface.\r\n[img src=https://i.imgur.com/pCD7IFt.png]\r\n\r\n5. Now paste (CTRL+V) the [b]Import String [/b]that you\'ve copied earlier.\r\n[img src=https://i.imgur.com/YVYuDxB.png]\r\n6. Next, you can click on [b]Import[/b]. This will import the WeakAura.\r\n[img src=https://i.imgur.com/OJiXlmE.png]\r\n\r\nOnce the WeakAura is succesfully imported, you should be able to see the newly added WeakAura in your [b]Loaded[/b] list.\r\n[img src=https://i.imgur.com/LFMmMiE.png]\r\n\r\n[hr]\r\nAnd that was the entire import process, I hope this guide was helpful.\r\n\r\nIf you have any questions feel free to comment below!\r\n", "article-generic", {"dbpage":true,"allow":Markup.CLASS_ADMIN});
+    //]]></script>
+    <div class="pad2"></div>
+
+
+
+                                    <h2 class="clear">Related</h2>
+                
+
+            </div>
+            <div class="clear"></div>
+            <div id="tabs-generic"></div>
+            <div id="lv-generic" class="listview"></div>
+            <script type="text/javascript">//<![CDATA[
+                var tabsRelated = new Tabs({parent: $WH.ge('tabs-generic'), trackable: 'Guide'});
+                new Listview({template: 'comment', id: 'comments', name: LANG.tab_comments, tabs: tabsRelated, parent: 'lv-generic', data: lv_comments});
+                tabsRelated.flush();
+            //]]></script>
+<div class="clear"></div>
+<div class="text ">
+<h2>Contribute</h2>
+</div>
+<div id="tabs-contribute-generic" style="width: 50%"></div>
+<div class="text contribute-text" style="margin-right: 310px">
+    <div class="tabbed-contents" style="clear: none">
+<div id="tab-add-your-comment" style="display: none">
+    Please keep the following in mind when posting a comment:
+    <ul>
+        <li><div>Your comment must be in English or it will be removed.</div></li>
+        <li><div>You might want to proof-read your comments before posting them.</div></li>
+    </ul>
+            <form action="/" method="post">
+            <div class="comment-edit-body"><textarea class="comment-editbox" rows="10" cols="40" name="commentbody" disabled="disabled"></textarea></div>
+                            <small>You are not logged in. Please <a href="?account=signin">log in</a> or <a href="?account=signup">register an account</a> to add your comment.</small>
+                    </form>
+</div>
+<div id="tab-submit-a-screenshot" style="display: none">
+    Simply browse for your screenshot using the form below.
+    <ul>
+        <li><div>In-game screenshots are preferred over model-viewer-generated ones.</div></li>
+        <li><div>The higher the quality the better!</div></li>
+    </ul>
+            <form action="/" method="post">
+            <input type="file" name="screenshotfile" disabled="disabled" /><br />
+                            <small>You are not signed in. Please <a href="?account=signin">sign in</a> to submit a screenshot.</small>
+                    </form>
+</div>
+
+    </div>
+</div>
+<script type="text/javascript">
+    var tabsContribute = new Tabs({parent: $WH.ge('tabs-contribute-generic')});
+    tabsContribute.add(LANG.tab_addyourcomment, {id: 'add-your-comment'});
+    tabsContribute.flush();
+</script>
+
+            <div class="clear"></div>
+        </div><!-- main-contents -->
+    </div><!-- main -->
+
+
+
+
+
+
+<div class="modal-parent" id="modal" onclick="hideModalOutside(event)">
+    <div class="modal">
+        <a class=" button-red modal-close" onclick="hideModal()"><i class="fa-solid fa-xmark"></i></a>
+
+        
+           
+
+        
+
+    </div>
+</div>
+
+
+        <div class="footer">
+
+
+
+
+
+        </div>
+    </div><!-- #wrapper .nosidebar -->
+    </div><!-- #layout-inner -->
+</div><!-- #layout .nosidebar -->
+
+<noscript>
+    <div id="noscript-bg"></div>
+    <div id="noscript-text"><b>This site makes extensive use of JavaScript.</b><br />Please <a href="https://www.google.com/support/adsense/bin/answer.py?answer=12654" target="_blank">enable JavaScript</a> in your browser.</div>
+</noscript>
+
+<script type="text/javascript">DomContentLoaded.now()</script>
+
+
+<!---->
+<!--        <div class="gdrp-notifcation">-->
+<!--            <div class="gdpr-content">-->
+<!--                The Ascension DB uses cookies and third-party cookies to keep track of login sessions and to analyze web traffic. <a target="_blank" style="margin-top: 5px" href="https://www.cloudflare.com/learning/privacy/what-are-cookies/">You can read here more about cookies.</a>-->
+<!--                <div class="gdpr-actions">-->
+<!--                    <input class="accept" type="button" value="Accept">-->
+<!--                    <input class="decline" type="button" value="Decline">-->
+<!--                </div>-->
+<!---->
+<!--            </div>-->
+<!--        </div>-->
+<script src="/ascensiondb/static/interceptor.js"></script>
+</body>
+</html>

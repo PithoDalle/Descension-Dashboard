@@ -1,0 +1,322 @@
+#layers {
+    text-align: left;
+    color: #ffffff;
+    font-family: "Arial", sans-serif;
+    font-size: 13px;
+}
+
+
+:root {
+    --text: gainsboro;
+    --text-placeholder: #5D5E61;
+    --text-white: #fff;
+    --subtext: #8c8c8c;
+    --text-tooltip: #fdc02c;
+
+    /*bgs*/
+    --bg-darker: #121212;
+    --bg-darker-transparent: rgba(18, 18, 18, 0.95);
+    --bg-dark: #171717;
+    --bg: rgb(29, 29, 29);
+    --bg-hover: rgb(30, 30, 30);
+    --bg-transparant: rgba(29, 29, 29, 0.95);
+    --bg-transparant-extra: rgba(29, 29, 29, 0.80);
+    --bg-transparant-half: rgba(16, 16, 16, 0.5);
+}
+
+.wowhead-tooltip         { visibility: hidden; z-index: 100000006; overflow: visible !important;  }
+.wowhead-tooltip a       { text-decoration: none; }
+.wowhead-tooltip a:hover { text-decoration: underline; }
+
+.wowhead-tooltip table { border-spacing: 0; border-collapse: collapse; margin: 0; width: auto; } /*maybe remove width:auto*/
+.wowhead-tooltip table, .wowhead-tooltip td, .wowhead-tooltip th, .wowhead-tooltip tbody { border: 0 !important; }
+.wowhead-tooltip td table td table { width: 100% }
+.wowhead-tooltip td, .wowhead-tooltip th
+{
+
+    /*background: url(../images/wow/tooltip-gray.png);*/
+    font-family: Verdana, sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+    color: white;
+}
+.wowhead-tooltip th { height: auto; padding: 3px; vertical-align: top; }
+.wowhead-tooltip td { padding: 8px 4px 1px 9px; text-align: left; vertical-align: top; }
+.wowhead-tooltip b { font-size: 14px; line-height: 19px; font-weight: normal; }
+
+.wowhead-tooltip div.indent { padding-left: .6em; }
+.wowhead-tooltip td th, .wowhead-tooltip td td { background: none; }
+.wowhead-tooltip td th { padding: 0 0 0 4em; text-align: right; font-weight: normal; }
+.wowhead-tooltip td td { padding: 0; text-align: left; }
+.wowhead-tooltip p    {
+    position: absolute;
+    left: -44px;
+    top: -1px;
+    width: 37px;
+    height: 37px;
+    margin: 0;
+    padding: 0;
+    border-radius: 5px;
+    background-color: var(--bg-darker-transparent);
+
+}
+
+.wowhead-tooltip p div {
+    width: 38px;
+    height: 38px;
+    box-sizing: border-box;
+    border-right: 2px solid #3e3d3d;
+    border-bottom: 2px solid #3e3d3d;
+    border-left: 2px solid #4f4e4e;
+    border-top: 2px solid gray;
+    border-radius: 5px;
+
+    box-shadow: var(--box-shadow-darker)
+}
+
+.wowhead-tooltip table.shrink b { font-size: 13px; line-height: 15px; }
+.wowhead-tooltip table.shrink td, .wowhead-tooltip table.shrink th { font-size: 13px; line-height: 14px; }
+
+
+
+
+.wowhead-tooltip .mapper {
+    margin: 10px 0 3px 1px;
+    border: none;
+    box-shadow: none !important;
+}
+
+.wowhead-tooltip .mapper .pin a
+{
+
+ left: 0 !important;
+}
+
+
+
+
+/*.wowhead-tooltip ins { color: #5DF644; text-decoration: none; border-bottom: 1px dotted; }*/
+/*.wowhead-tooltip del { color: #FF8040; text-decoration: none; border-bottom: 1px dotted; }*/
+
+.wowhead-tooltip {
+    width: fit-content !important;
+    max-width: 570px !important;
+    max-height: 1440px !important;
+    box-shadow: 0px 0px 2px black;
+    background-color: var(--bg-darker-transparent);
+    border-right: 2px solid #373737;
+    border-bottom: 2px solid #3e3d3d;
+    border-left: 2px solid #4f4e4e;
+    border-top: 2px solid #868686;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.wowhead-tooltip-powered {
+    /* background: url(../images/powered.png) no-repeat; */
+    width: 53px;
+    height: 33px;
+    position: absolute;
+    right: -56px;
+    top: 2px;
+    display: none;
+}
+
+.moneyitem, .moneygold, .moneysilver, .moneycopper, .moneyalliance, .moneyhorde, .moneyarena, .moneyachievement, .moneysocketmeta, .moneysocketred, .moneysocketyellow, .moneysocketblue, .moneysocketprismatic {
+    background: no-repeat right center;
+    color: white;
+}
+
+.moneyitem            { padding-right: 18px; }
+.moneygold            { padding-right: 15px; background-image: url(../images/icons/money-gold.gif);       }
+.moneysilver          { padding-right: 15px; background-image: url(../images/icons/money-silver.gif);     }
+.moneycopper          { padding-right: 15px; background-image: url(../images/icons/money-copper.gif);     }
+.moneyalliance        { padding-right: 12px; background-image: url(../images/icons/alliance.gif);         }
+.moneyhorde           { padding-right: 17px; background-image: url(../images/icons/horde.gif);            }
+.moneyarena           { padding-right: 18px; background-image: url(../images/icons/arena.gif);            }
+.moneyachievement     { padding-right: 13px; background-image: url(../images/icons/achievement.gif);      }
+.moneysocketmeta      { padding-right: 18px; background-image: url(../images/icons/socket-meta.gif);      }
+.moneysocketred       { padding-right: 18px; background-image: url(../images/icons/socket-red.gif);       }
+.moneysocketyellow    { padding-right: 18px; background-image: url(../images/icons/socket-yellow.gif);    }
+.moneysocketblue      { padding-right: 18px; background-image: url(../images/icons/socket-blue.gif);      }
+.moneysocketprismatic { padding-right: 18px; background-image: url(../images/icons/socket-prismatic.gif); }
+
+a.moneyitem, a.moneysocketmeta, a.moneysocketred, a.moneysocketyellow, a.moneysocketblue, a.moneysocketprismatic,  a.moneyachievement{
+    text-decoration: none !important;
+    border-bottom: 1px solid transparent;
+    color: white !important;
+}
+
+a.moneyitem:hover, a.moneysocketmeta:hover, a.moneysocketred:hover, a.moneysocketyellow:hover, a.moneysocketblue:hover, a.moneysocketprismatic:hover, a.moneyachievement:hover  {
+    border-bottom: 1px solid white;
+}
+
+a span.moneyitem, a span.moneysocketmeta, a span.moneysocketred, a span.moneysocketyellow, a span.moneysocketblue, a span.moneysocketprismatic, a span.moneyachievement {
+    color: white;
+}
+
+.blizzard-blue { color: #00C0FF !important; }
+
+/***********************/
+/* ITEM QUALITY COLORS */
+/***********************/
+
+/*//#ffd100*/
+ .q,   .q  a, .color-q,   .wowhead-tooltip .q   a { color: var(--text-tooltip)  !important } /* Default (yellow) */
+ .q0,  .q0 a, .color-q0,  .wowhead-tooltip .q0  a { color: #9d9d9d !important } /* Poor */
+ .q1,  .q1 a, .color-q1,  .wowhead-tooltip .q1  a { color: #ffffff !important } /* Common */
+ .q2,  .q2 a, .color-q2,  .wowhead-tooltip .q2  a { color: #1eff00 !important; } /* Uncommon */
+ .q3,  .q3 a, .color-q3,  .wowhead-tooltip .q3  a { color: #0070dd !important } /* Rare */
+ .q4,  .q4 a, .color-q4,  .wowhead-tooltip .q4  a { color: #a335ee !important } /* Epic */
+ .q5,  .q5 a, .color-q5,  .wowhead-tooltip .q5  a { color: #ff8000 !important } /* Legendary */
+ .q6,  .q6 a, .color-q6,  .wowhead-tooltip .q6  a { color: #e5cc80 !important } /* Artifact */
+ .q7,  .q7 a, .color-q7,  .wowhead-tooltip .q7  a { color: #0cf !important } /* Heirloom */
+ .q8,  .q8 a, .color-q8,  .wowhead-tooltip .q8  a { color: #ffff98 !important } /* Light yellow (item set bonuses) */
+ .q9,  .q9 a, .color-q9,  .wowhead-tooltip .q9  a { color: #71d5ff !important } /* Light blue (glyph type) */
+.q10, .q10 a, .color-q10, .wowhead-tooltip .q10 a { color: #ff4040 !important } /* Red (requirement not met, error) */
+.q13, .q13 a, .color-q13, .wowhead-tooltip .q13 a { color: #ffff98 !important }
+
+
+ .poor,  .poor a { color:#9d9d9d!important; }
+ .common,  .common a { color: var(--text-white) !important; }
+ .uncommon,  .uncommon a { color:#1eff00!important; }
+ .rare,  .rare a { color:#0070dd!important; }
+ .epic,  .epic a { color:#a335ee!important; }
+ .legendary,  .legendary a { color:#ff8000!important; }
+ .vanity,  .vanity a { color:#e5cc80!important; }
+ .heirloom,  .heirloom a { color:#0cf!important; }
+
+.q10 { font-weight:  bold !important;}
+.bloodforged {color: #d12a2a !important}
+
+/*********************/
+/* DIFFICULTY COLORS */
+/*********************/
+
+.r1 { color: #FF8040 !important } /* Hard */
+.r2 { color: #FFFF00 !important } /* Medium */
+.r3 { color: #40BF40 !important } /* Easy */
+.r4 { color: #808080 !important } /* Trivial */
+
+/****************/
+/* CLASS COLORS */
+/****************/
+
+.c1,  .c1 a  { color: #C69B6D !important } /* Warrior */
+.c2,  .c2 a  { color: #F48CBA !important } /* Paladin */
+.c3,  .c3 a  { color: #AAD372 !important } /* Hunter */
+.c4,  .c4 a  { color: #FFF468 !important } /* Rogue */
+.c5,  .c5 a  { color: #FFFFFF !important } /* Priest */
+.c6,  .c6 a  { color: #C41E3B !important } /* Death Knight */
+.c7,  .c7 a  { color: #2359FF !important } /* Shaman */
+.c8,  .c8 a  { color: #68CCEF !important } /* Mage */
+.c9,  .c9 a  { color: #9382C9 !important } /* Warlock */
+.c10,  .c10 a { color: var(--text-tooltip) !important } /* hero */
+.c11, .c11 a { color: #FF7C0A !important } /* Druid */
+.c12, .c12 a { color:#8A3303!important; } /*BARB*/
+.c13, .c13 a { color:#6EFF00!important; } /*WITCHDOCTOR*/
+.c14, .c14 a { color:#A330C9!important; } /*DEMON*/
+.c15, .c15 a { color:#ABD473!important; } /*WITCHHUNTER*/
+.c16, .c16 a { color:#0070DE!important; } /*STORM*/
+.c17, .c17 a { color:#D64747!important; } /*FLESH - XOROTH*/
+.c18, .c18 a { color:#C79C6E!important; } /*GUARDIAN*/
+.c19, .c19 a { color:#00FF99!important; } /*MONK*/
+.c20, .c20 a { color:#CC9900!important; } /*ARUGAL*/
+.c21, .c21 a { color:#FFF569!important; } /*RANGER*/
+.c22, .c22 a { color:#F2E699!important; } /*CHRONOMANCER*/
+.c23, .c23 a { color:#8787ED!important; } /*NECRO*/
+.c24, .c24 a { color:#FF300F!important; } /*PYRO*/
+.c25, .c25 a { color:#E0C7FF!important; } /*CULTIST*/
+.c26, .c26 a { color:#B5FFFF!important; } /*STARCALLER*/
+.c27, .c27 a { color:#F58CBA!important; } /*SUNCLERIC*/
+.c28, .c28 a { color:#A3A3A3!important; } /*TINKER*/
+.c29, .c29 a { color:#FF7D0A!important; } /*PROPHET - VENOM*/
+.c30, .c30 a { color:#C41F3B!important; } /*REAPER*/
+.c31, .c31 a { color:#0D2ED6!important; } /*WILD - PRIMALIST*/
+.c32, .c32 a { color:#40C7EB!important; } /*SPIRITMAGE  RUNEMASTER*/
+
+/**************/
+/* GEM COLORS */
+/**************/
+
+.gem1  { color: #9D9D9D !important } /* Meta */
+.gem2  { color: #e60c0b !important } /* Red */
+.gem4  { color: #ffff35 !important } /* Yellow */
+.gem6  { color: #f48905 !important } /* Orange */
+.gem8  { color: #295df1 !important } /* Blue */
+.gem10 { color: #b957fc !important } /* Purple */
+.gem12 { color: #22c516 !important } /* Green */
+.gem14 { color: #FFFFFF !important } /* Prismatic */
+
+/****************/
+/* NPC MESSAGES */
+/****************/
+
+.s1 { color: #ff3f40 !important } /* Yell */
+.s2 { color: #fffb9f !important } /* Say */
+.s3 { color: #ffb2eb !important } /* Whisper */
+.s4 { color: #ff8040 !important } /* Emote */
+
+/********************/
+/* REPUTATION RANKS */
+/********************/
+
+.rep0, .rep-hated      { color: #f00 !important }
+.rep1, .rep-hostile    { color: #f44 !important }
+.rep2, .rep-unfirendly { color: #e62 !important }
+.rep3, .rep-neutral    { color: #ff0 !important }
+.rep4, .rep-friendly   { color: #0f0 !important }
+.rep5, .rep-honored    { color: #0f8 !important }
+.rep6, .rep-revered    { color: #0fc !important }
+.rep7, .rep-exalted    { color: #0ff !important }
+
+/*****************/
+/* SOCKETS ICONS */
+/*****************/
+
+.socket-meta      { padding-left: 26px; background: url(../images/icons/socket-meta.gif) no-repeat left center;      }
+.socket-red       { padding-left: 26px; background: url(../images/icons/socket-red.gif) no-repeat left center;       }
+.socket-yellow    { padding-left: 26px; background: url(../images/icons/socket-yellow.gif) no-repeat left center;    }
+.socket-blue      { padding-left: 26px; background: url(../images/icons/socket-blue.gif) no-repeat left center;      }
+.socket-prismatic { padding-left: 26px; background: url(../images/icons/socket-prismatic.gif) no-repeat left center; }
+
+/***********/
+/* WIDGETS */
+/***********/
+
+#wowhead-bluetip {
+    position: absolute;
+    z-index: 99999;
+    color: #fff;
+    font-size: 12px;
+    text-align: center;
+    padding: 6px 8px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.8);
+    text-align: left;
+    max-width: 300px;
+}
+
+.message-box {
+    position: absolute;
+    z-index: 1000;
+    cursor: pointer;
+    border: 2px solid #666;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    padding: 15px;
+    background:url(../images/ui/blk.png) repeat;
+}
+
+.message-box .close {
+    text-indent: -9999px;
+    background:url(../images/icons/close.png) no-repeat;
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}

@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AzerothCoreCOA Dashboard</title>
+<style>
+  :root {
+    --bg: #0c0d10;
+    --panel: #15161a;
+    --panel-2: #1d1f25;
+    --border: rgba(255,255,255,.11);
+    --text: #f6f5f2;
+    --text-dim: #85827a;
+    --accent: #4aa3ff;
+    --accent-dim: rgba(74,163,255,.16);
+    --green: #35b36a;
+    --red: #e05a4a;
+    --amber: #f0cc6a;
+    --alliance: #3987e5;
+    --horde: #e05a4a;
+    --teal: #1aa390;
+    --shadow: 0 1px 2px rgba(0,0,0,.5), 0 18px 40px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: "Segoe UI Variable Text", "Segoe UI", Inter, system-ui, sans-serif;
+    background: radial-gradient(1100px 520px at 60% -180px, rgba(74,163,255,.13), transparent 70%), var(--bg);
+    display: flex; height: 100vh; overflow: hidden;
+  }
+  #sidebar {
+    width: 210px; background: var(--panel); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
+  }
+  #brand {
+    padding: 20px 18px 16px; border-bottom: 1px solid var(--border);
+  }
+  #brand .title { font-size: 15px; font-weight: 700; letter-spacing: .5px; }
+  #brand .sub { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+  nav { padding: 14px 10px; display: flex; flex-direction: column; gap: 2px; }
+  nav .nav-heading {
+    font-size: 10px; text-transform: uppercase; letter-spacing: .6px; color: var(--text-dim);
+    padding: 12px 12px 4px;
+  }
+  nav .nav-ico { width: 16px; height: 16px; border-radius: 3px; margin: 0 -6px 0 1px; flex: none; }
+  nav .nav-divider { height: 1px; margin: 10px 14px; background: var(--border); }
+  nav .nav-heading:first-child { padding-top: 2px; }
+  nav button {
+    all: unset; cursor: pointer; padding: 10px 12px; border-radius: 8px;
+    font-size: 13px; color: var(--text-dim); display: flex; align-items: center; gap: 10px;
+  }
+  nav button:hover { background: var(--panel-2); color: var(--text); }
+  nav button.active { background: var(--accent-dim); color: #fff; }
+  /* Character art filling the empty space between the menu and the footer. */
+  #sidebar-art { flex: 1 1 0; min-height: 0; padding: 0 6px; overflow: hidden; pointer-events: none; user-select: none; }
+  #sidebar-art img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; opacity: .95; }
+  #sidebar-footer { margin-top: auto; padding: 14px; font-size: 10px; color: var(--text-dim); border-top: 1px solid var(--border); }
+  /* Collapsible sidebar */
+  #sidebar-footer { position: relative; }
+  #sb-hide { position: absolute; right: 10px; bottom: 10px; all: unset; cursor: pointer; }
+  #sidebar-footer #sb-hide { position: absolute; right: 12px; bottom: 12px; width: 26px; height: 26px; display: grid; place-items: center;
+    border-radius: 8px; color: var(--text-dim); font-size: 15px; border: 1px solid var(--border); background: var(--panel-2); }
+  #sidebar-footer #sb-hide:hover { color: var(--accent); border-color: var(--accent); }
+  #sb-show { display: flex; position: fixed; left: 0; top: 50%; z-index: 50; cursor: pointer;
+    width: 22px; height: 56px; align-items: center; justify-content: center; font-size: 15px; color: var(--text-dim);
+    background: var(--panel); border: 1px solid var(--border); border-left: none; border-radius: 0 10px 10px 0; padding: 0;
+    opacity: 0; pointer-events: none; transform: translate(-10px, -50%);
+    transition: opacity .25s ease .1s, transform .3s cubic-bezier(.4, 0, .2, 1) .1s; }
+  #sb-show:hover { color: var(--accent); border-color: var(--accent); }
+  /* The sidebar animates its width to 0 (contents keep their width and are clipped), the page reflows smoothly. */
+  #sidebar { overflow-x: hidden; transition: width .3s cubic-bezier(.4, 0, .2, 1), opacity .25s ease, border-color .3s ease; }
+  #sidebar > * { min-width: 209px; }
+  body.sb-hidden #sidebar { width: 0; opacity: 0; border-right-color: transparent; pointer-events: none; }
+  body.sb-hidden #sb-show { opacity: 1; pointer-events: auto; transform: translate(0, -50%); }
+
+  #main { flex: 1; overflow-y: auto; padding: 26px 32px; position: relative; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .page-sub { color: var(--text-dim); font-size: 12.5px; margin-bottom: 22px; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 22px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px;
+  }
+  .card .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .card .label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .dot.on { background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .dot.off { background: var(--red); }
+  .status-text { font-size: 15px; font-weight: 600; }
+  .card .actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .card .actions .btn { flex: 1; white-space: nowrap; }
+
+  .svc-icon { width: 15px; height: 15px; vertical-align: -3px; image-rendering: -webkit-optimize-contrast; }
+  .svc-icon-fallback { font-size: 13px; }
+  .svc-mysql { display: inline-block; width: 17px; height: 15.4px; vertical-align: -3px; background: url(/mysql_logo.png) no-repeat; background-size: 57.6px auto; background-position: -31.5px -7.1px; filter: brightness(1.3); }
+  /* MySQL wordmark colours: "My" blue-grey, "SQL" orange (lightened a little for the dark background). */
+  .my-my { color: #6f9bb8; }
+  .my-sql { color: #f7a02c; }
+
+  .health { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 7px; }
+  .health-row { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-dim); }
+  .health-row .h-label { width: 30px; flex-shrink: 0; }
+  .health-row .h-bar { flex: 1; height: 6px; border-radius: 4px; background: var(--panel-2); overflow: hidden; }
+  .health-row .h-bar > span { display: block; height: 100%; background: var(--accent); border-radius: 4px; transition: width .4s ease; }
+  .health-row .h-value { min-width: 90px; flex-shrink: 0; text-align: right; color: var(--text); font-variant-numeric: tabular-nums; }
+  .health-row.dim .h-value { color: var(--text-dim); }
+
+  button.btn {
+    all: unset; cursor: pointer; padding: 10px 18px; border-radius: 8px; font-size: 13px;
+    font-weight: 600; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px solid transparent; box-sizing: border-box;
+    transition: transform .08s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn-primary {
+    background: linear-gradient(180deg, #4dc4ff, var(--accent)); color: #04131d;
+    box-shadow: 0 2px 10px rgba(53,182,255,.35);
+  }
+  .btn-primary:hover { background: linear-gradient(180deg, #63cdff, #4dc4ff); box-shadow: 0 4px 16px rgba(53,182,255,.45); }
+  .btn-primary:active { transform: translateY(1px); box-shadow: 0 1px 4px rgba(53,182,255,.3); }
+  .btn-outline {
+    background: var(--panel-2); border-color: var(--border); color: var(--text);
+    box-shadow: 0 1px 3px rgba(0,0,0,.35);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); background: #182236; }
+  .btn-outline:active { transform: translateY(1px); }
+  .btn-danger { background: rgba(239,68,68,.08); border-color: #5a2323; color: #f0a0a0; }
+  .btn-danger:hover { background: rgba(239,68,68,.16); border-color: #7a2f2f; }
+  .btn-danger:active { transform: translateY(1px); }
+  .btn:disabled { opacity: .4; cursor: default; transform: none; box-shadow: none; }
+
+  .row { display: flex; gap: 10px; margin-bottom: 18px; }
+  .toolbar { display: flex; gap: 10px; margin-bottom: 22px; }
+  .section-heading { font-size: 14px; margin: 4px 0 12px; color: var(--text); }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .tab {
+    all: unset; cursor: pointer; padding: 8px 16px; border-radius: 8px 8px 0 0;
+    font-size: 13px; color: var(--text-dim); border: 1px solid transparent;
+  }
+  .tab.active { background: var(--panel); color: var(--text); border-color: var(--border); border-bottom-color: var(--panel); }
+
+  #console-box {
+    background: #060a10; border: 1px solid var(--border); border-radius: 10px 10px 0 0;
+    padding: 14px 16px; font-family: "Cascadia Code", Consolas, monospace; font-size: 12px;
+    line-height: 1.5; white-space: pre-wrap; word-break: break-word;
+    height: 360px; overflow-y: auto; color: #c9d6e6;
+  }
+  #console-input-row {
+    display: flex; gap: 8px; margin-top: 0; background: #0d1420; border: 1px solid var(--border);
+    border-top: none; border-radius: 0 0 10px 10px; padding: 10px 12px;
+  }
+  #console-input-row input {
+    flex: 1; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 9px 12px; color: var(--text); font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 12.5px; outline: none;
+  }
+  #console-input-row input:focus { border-color: var(--accent); }
+  #console-input-row input:disabled { opacity: .4; }
+  #console-hint { font-size: 11px; color: var(--text-dim); margin: 8px 0 0; }
+  /* Dashboard page: everything below the header is shown at 88% so the console + input bar fit on a 1080p screen. */
+  #page-dashboard > :not(.sb-header) { zoom: 0.88; }
+  /* Add item page shown at 80% so more of the kits / results fit. */
+  #page-additem { zoom: 0.8; }
+  /* Bots page content shown at 75%; the CoABots header keeps its normal size. */
+  #page-bots > :not(.sb-header) { zoom: 0.75; }
+
+  /* ---- Configs page: file list + built-in code editor ---- */
+  kbd { background: var(--panel-2); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; font-size: 11px; font-family: inherit; }
+  /* The page fills the window (main has 26px padding above and below), so nothing needs scrolling. */
+  #page-configs { display: flex; flex-direction: column; height: calc(100vh - 52px); }
+  /* Grid: toolbar on top of the editor, the file list card spans the editor + status bar so both line up top and bottom. */
+  #cfg-layout { display: grid; grid-template-columns: fit-content(55%) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; column-gap: 16px; flex: 1; min-height: 0; }
+  #cfg-main { display: contents; }
+  #cfg-side-head { grid-column: 1; grid-row: 1; align-self: center; display: flex; justify-content: space-between; align-items: baseline; padding: 0 6px 10px;
+    font-size: 10px; text-transform: uppercase; letter-spacing: .6px; color: var(--text-dim); }
+  #cfg-side-head #cfg-count { font-size: 11px; letter-spacing: 0; }
+  #cfg-side { grid-column: 1; grid-row: 2 / span 2; }
+  #cfg-bar { grid-column: 2; grid-row: 1; }
+  #cfg-editor-wrap { grid-column: 2; grid-row: 2; }
+  #cfg-status { grid-column: 2; grid-row: 3; }
+  #cfg-side { display: flex; flex-direction: column; min-height: 0; }
+  /* Config file list: a card like the rest of the dashboard */
+  .cfg-card { display: flex; flex-direction: column; height: 100%; box-sizing: border-box; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 8px 8px 6px; }
+  .cfg-search { position: relative; margin: 0 2px 2px; min-width: 190px; }
+  .cfg-search span { position: absolute; left: 11px; top: 50%; transform: translateY(-52%); color: var(--text-dim); font-size: 14px; pointer-events: none; }
+  #cfg-filter { width: 100%; box-sizing: border-box; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 6px 10px 6px 30px; color: var(--text); font-size: 12.5px; outline: none; }
+  #cfg-filter:focus { border-color: var(--accent); }
+  /* The file list holds 12 files per column; file 13 starts a new column and the card grows wider. Its content is shown
+     at 93% and scales down a little more (never below 70%) so a full column always fits the height (see cfgLayoutList). */
+  #config-list { flex: 1; min-height: 0; overflow: auto; display: flex; gap: 8px; align-items: flex-start; }
+  .cfg-col { flex: none; width: max-content; min-width: 150px; }
+  .cfg-search, #config-list { zoom: var(--cfg-zoom, 0.93); }
+  .cfg-group { font-size: 10px; text-transform: uppercase; letter-spacing: .6px; color: var(--text-dim); padding: 9px 8px 3px; }
+  .cfg-item { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 4px 8px;
+    border-radius: 8px; color: var(--text-dim); margin-bottom: 1px; }
+  .cfg-item:hover { background: var(--panel-2); color: var(--text); }
+  .cfg-item.active { background: var(--accent-dim); color: #fff; box-shadow: inset 2px 0 0 var(--accent); }
+  .cfg-ico { width: 18px; height: 18px; flex: none; display: grid; place-items: center; font-size: 15px; }
+  .cfg-ico img { width: 16px; height: 16px; object-fit: contain; }
+  .cfg-txt { flex: 1; min-width: 0; padding-right: 14px; }
+  .cfg-name { font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cfg-sub { font-size: 10.5px; color: var(--text-dim); opacity: .8; }
+  .cfg-item.active .cfg-sub { color: #b8c7e6; }
+  .cfg-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+  .cfg-dot.ok { background: #22c55e; box-shadow: 0 0 6px rgba(34, 197, 94, .5); }
+  .cfg-dot.missing { background: #ef4444; }
+  #cfg-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  #cfg-file { flex: 1; min-width: 200px; display: flex; align-items: baseline; gap: 12px; overflow: hidden; }
+  #config-path { font-size: 12px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; text-align: left; }
+  #cfg-dirty { font-size: 11.5px; color: #f5b94a; white-space: nowrap; }
+  #cfg-find { display: flex; align-items: center; gap: 6px; }
+  #cfg-find-input { width: 170px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; color: var(--text); font-size: 12.5px; outline: none; }
+
+  /* ---- Live map: zone picker box to the right of the map ---- */
+  #map-layout { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+  #map-layout #map-wrap { flex: 1 1 620px; min-width: 320px; }
+  #map-zone-box { flex: none; width: 220px; max-height: 668px; box-sizing: border-box; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 14px; box-shadow: var(--shadow); padding: 8px 8px 6px; display: flex; flex-direction: column; }
+  #map-zone-search { position: relative; margin: 0 2px 6px; }
+  #map-zone-search span { position: absolute; left: 11px; top: 50%; transform: translateY(-52%); color: var(--text-dim); font-size: 14px; pointer-events: none; }
+  #map-zone-filter { width: 100%; box-sizing: border-box; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 6px 10px 6px 30px; color: var(--text); font-size: 12.5px; outline: none; }
+  #map-zone-filter:focus { border-color: var(--accent); }
+  #map-zone-list { flex: 1; min-height: 0; overflow: auto; }
+  .map-zone-group { font-size: 10px; text-transform: uppercase; letter-spacing: .6px; color: var(--text-dim); padding: 9px 8px 3px; }
+  .map-zone-item { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: block; padding: 5px 10px;
+    border-radius: 8px; color: var(--text-dim); margin-bottom: 1px; font-size: 12.5px; }
+  .map-zone-item:hover { background: var(--panel-2); color: var(--text); }
+  .map-zone-item.active { background: var(--accent-dim); color: #fff; box-shadow: inset 2px 0 0 var(--accent); }
+  #cfg-find-input:focus { border-color: var(--accent); }
+  #cfg-find-input:disabled { opacity: .45; }
+  #cfg-find-count { font-size: 11.5px; color: var(--text-dim); min-width: 46px; text-align: center; }
+  .cfg-icon { all: unset; cursor: pointer; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 7px; border: 1px solid var(--border); color: var(--text-dim); background: var(--panel-2); }
+  .cfg-icon:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
+  .cfg-icon:disabled { opacity: .35; cursor: default; }
+  #cfg-editor-wrap { display: flex; flex: 1; min-height: 200px; border: 1px solid var(--border); border-radius: 10px 10px 0 0; overflow: hidden; background: #060a10; }
+  #cfg-editor-wrap:focus-within { border-color: var(--accent); }
+  #cfg-gutter { width: 56px; flex-shrink: 0; overflow: hidden; background: #0a101b; border-right: 1px solid var(--border); color: #4d5a72; text-align: right; user-select: none; }
+  #cfg-gutter-inner { padding: 10px 10px 10px 0; white-space: pre; }
+  #cfg-code { position: relative; flex: 1; min-width: 0; }
+  #cfg-hl, #config-editor { position: absolute; inset: 0; margin: 0; border: 0; box-sizing: border-box; }
+  #cfg-hl { overflow: hidden; pointer-events: none; }
+  #cfg-hl-inner { padding: 10px 14px; width: max-content; min-width: 100%; box-sizing: border-box; }
+  #cfg-gutter, #cfg-gutter-inner, #cfg-hl, #config-editor { font-family: "Cascadia Code", Consolas, monospace; font-size: 12.5px; line-height: 19px; tab-size: 4; }
+  #config-editor { padding: 10px 14px; background: transparent; color: transparent; caret-color: #e6edf7; white-space: pre; overflow: auto; resize: none; outline: none; }
+  #config-editor::selection { background: rgba(88, 138, 255, .38); color: transparent; }
+  #config-editor:disabled { cursor: default; }
+  #cfg-empty { position: absolute; inset: 0; display: none; place-items: center; color: var(--text-dim); font-size: 13px; pointer-events: none; }
+  #cfg-code.empty #cfg-empty { display: grid; }
+  #cfg-hl .cl { height: 19px; color: #c9d6e6; white-space: pre; }
+  #cfg-hl .cl.on { background: rgba(120, 160, 255, .07); }
+  #cfg-hl .cm { color: #6b8a74; }
+  #cfg-hl .cs { color: #ffd479; font-weight: 600; }
+  #cfg-hl .ck { color: #7cb7ff; }
+  #cfg-hl .cp { color: #8a94a8; }
+  #cfg-hl .cstr { color: #f0a878; }
+  #cfg-hl .cnum { color: #b5e08a; }
+  #cfg-hl .cbool { color: #c792ea; }
+  #cfg-hl .mk { background: rgba(245, 185, 74, .28); border-radius: 2px; }
+  #cfg-hl .mk.cur { background: rgba(245, 185, 74, .6); outline: 1px solid #f5b94a; }
+  #cfg-status { display: flex; justify-content: space-between; gap: 12px; padding: 6px 12px; font-size: 11.5px; color: var(--text-dim);
+    background: #0a101b; border: 1px solid var(--border); border-top: none; border-radius: 0 0 10px 10px; }
+
+
+  .settings-form { max-width: 640px; display: flex; flex-direction: column; gap: 16px; }
+  .field label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+  .field input {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; color: var(--text); font-size: 13px; outline: none;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .path-row { display: flex; gap: 8px; }
+  .path-row input { flex: 1; min-width: 0; }
+  .path-row button { flex: none; white-space: nowrap; }
+
+  /* ---------- setup wizard ---------- */
+  .wizard-overlay {
+    position: fixed; inset: 0; z-index: 200; background: rgba(6, 7, 9, .8);
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  .wizard-box {
+    width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 28px 30px 20px; box-shadow: var(--shadow);
+  }
+  .wizard-box h1 { font-size: 19px; margin: 0 0 4px; }
+  .wizard-dots { display: flex; gap: 6px; justify-content: center; margin-bottom: 20px; }
+  .wizard-dots span { width: 7px; height: 7px; border-radius: 50%; background: var(--border); }
+  .wizard-dots span.active { background: var(--accent); }
+  .wizard-dots span.done { background: var(--green); }
+  .wizard-nav { display: flex; align-items: center; gap: 12px; margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .wizard-nav #wiz-next { margin-left: auto; }
+  .wizard-error { color: var(--red); font-size: 12.5px; flex: 1; text-align: center; }
+  .wizard-check { display: block; margin-top: 10px; font-size: 12.5px; }
+  .wizard-check.ok { color: var(--green); }
+  .wizard-check.bad { color: var(--red); }
+  .wizard-summary { font-size: 13px; color: var(--text-dim); line-height: 1.9; }
+  .wizard-summary b { color: var(--text); font-weight: 600; }
+
+  .admin-section {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; margin-bottom: 20px;
+  }
+  .admin-section h2 { font-size: 14px; margin: 0 0 4px; }
+  .admin-section .hint { font-size: 11.5px; color: var(--text-dim); margin-bottom: 14px; }
+  .form-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 4px; }
+  .form-row .field { flex: 1; min-width: 140px; margin-bottom: 0; }
+  .form-row .field.narrow { flex: 0 0 90px; min-width: 90px; }
+  .form-row label { display: block; font-size: 11px; color: var(--text-dim); margin-bottom: 5px; }
+  .form-row input, .form-row select {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px;
+    padding: 8px 10px; color: var(--text); font-size: 12.5px; outline: none;
+  }
+  .form-row input:focus, .form-row select:focus { border-color: var(--accent); }
+
+  table.admin-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 12px; }
+  table.admin-table th {
+    text-align: left; color: var(--text-dim); font-weight: 600; font-size: 11px;
+    text-transform: uppercase; letter-spacing: .3px; padding: 6px 8px; border-bottom: 1px solid var(--border);
+  }
+  table.admin-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.admin-table tr:last-child td { border-bottom: none; }
+  .btn-sm { padding: 5px 10px; font-size: 11.5px; }
+  .admin-tabs { display: flex; gap: 6px; margin-bottom: 4px; }
+
+  .toast {
+    position: fixed; bottom: 22px; right: 22px; background: var(--panel-2); border: 1px solid var(--accent);
+    padding: 10px 16px; border-radius: 8px; font-size: 12.5px; opacity: 0; transform: translateY(10px);
+    transition: all .2s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* --- SquidBots-style skin --- */
+  nav button.active { color: var(--accent); box-shadow: inset 2px 0 0 var(--accent); }
+  nav button { border-radius: 10px; }
+  #brand .title { color: var(--accent); }
+  .card { border-radius: 18px; box-shadow: var(--shadow); }
+  .btn { border-radius: 999px; }
+  .btn-primary { color: #04121f; }
+  h1 { letter-spacing: -.4px; }
+  /* bots page */
+  .sb-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); background: var(--panel);
+    border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); margin-bottom: 18px; overflow: hidden; }
+  .sb-strip > div { padding: 16px 18px; border-left: 1px solid var(--border); }
+  .sb-strip > div:first-child { border-left: none; }
+  .sb-k { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--text-dim); }
+  .sb-v { font-size: 30px; font-weight: 700; letter-spacing: -.5px; line-height: 1.15; font-variant-numeric: tabular-nums; }
+  .sb-s { font-size: 12px; color: var(--text-dim); }
+  .sb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 18px; margin-bottom: 18px; }
+  .sb-card { background: var(--panel); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); padding: 20px 22px; }
+  .sb-card h2 { margin: 0 0 12px; font-size: 16px; font-weight: 650; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .sb-card h2 span { font-size: 12px; font-weight: 450; color: var(--text-dim); }
+  .sb-bar { display: flex; height: 16px; border-radius: 999px; overflow: hidden; background: var(--panel-2); }
+  .sb-bar i { display: block; height: 100%; }
+  .sb-legend { display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 0 18px; font-size: 12.5px; color: var(--text-dim); }
+  .sb-legend b { color: var(--text); }
+  .sb-dot { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 6px; }
+  .sb-row { display: grid; grid-template-columns: 170px 1fr 40px; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.06); font-size: 13.5px; }
+  .sb-row:last-of-type { border-bottom: none; }
+  .sb-row .n { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+  .sb-track { height: 8px; border-radius: 999px; background: var(--panel-2); display: flex; overflow: hidden; }
+  .sb-cols { display: flex; align-items: flex-end; gap: 10px; height: 150px; margin-top: 8px; }
+  .sb-cols > div { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; font-size: 12px; color: var(--text-dim); gap: 6px; }
+  .sb-cols .c { width: 100%; background: var(--accent); border-radius: 8px 8px 0 0; }
+  .sb-cols .v { color: var(--text); font-weight: 600; }
+  .sb-empty { color: var(--text-dim); font-size: 13px; padding: 24px 0; }
+  .sb-tag { padding: 1px 8px; border-radius: 999px; font-size: 11px; background: var(--panel-2); color: var(--text-dim); }
+  .tabs { gap: 8px; }
+  .tab { padding: 7px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel-2); }
+  .tab:hover { color: var(--text); }
+  .tab.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+
+  /* --- SquidBots-style page header --- */
+  .sb-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 0 0 24px; }
+  .sb-mark { display: flex; align-items: center; gap: 14px; margin-right: auto; }
+  .sb-crest { width: 60px; height: 60px; border-radius: 14px; flex: none; display: grid; place-items: center; font-size: 24px;
+    background: none; box-shadow: none; }
+  .sb-title { font-size: 28px; font-weight: 700; letter-spacing: -.5px; line-height: 1.1; }
+  .sb-title span { color: var(--accent); }
+  .sb-sub { font-size: 13px; color: var(--text-dim); margin-top: 3px; }
+  .sb-pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border-radius: 999px; background: var(--panel);
+    border: 1px solid var(--border); font-size: 13px; color: #b9b6ad; box-shadow: var(--shadow); }
+  .sb-pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex: none; animation: sbpulse 2.4s ease-in-out infinite; }
+  .sb-pill i.off { background: var(--red); animation: none; }
+  @keyframes sbpulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+  .btn img.btn-icon { width: 18px; height: 18px; object-fit: contain; vertical-align: -4px; margin-right: 2px; }
+  #item-tip { position: fixed; z-index: 9999; display: none; max-width: 340px; pointer-events: none; padding: 9px 12px;
+    background: rgba(8,12,20,.97); border: 1px solid #3a4560; border-radius: 8px; box-shadow: 0 8px 28px rgba(0,0,0,.6);
+    font-size: 12.5px; line-height: 1.45; color: #e8e6ee; }
+  #item-tip .tip-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  #item-tip .tip-row { display: flex; justify-content: space-between; gap: 16px; }
+  #item-tip .good { color: #1eff00; }
+  #item-tip .dim { color: #9aa3b5; }
+  #item-tip .flavor { color: #ffd100; }
+  #item-tip .tip-id { color: #6d7688; font-size: 11px; margin-top: 4px; }
+  .kit-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; }
+  .kit-card { border: 1px solid var(--border); border-radius: 10px; background: var(--panel-2); padding: 10px 12px; margin-top: 10px; }
+  .kit-card-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .kit-card-h .kit-name { font-weight: 600; margin-right: auto; }
+  .kit-toggle { background: none; border: 0; color: var(--text-dim); cursor: pointer; font-size: 14px; width: 20px; padding: 0; }
+  .kit-toggle:hover { color: var(--accent); }
+  .kit-card-h .kit-name { cursor: pointer; margin-right: 0; }
+  .kit-count-badge { font-size: 11.5px; color: var(--text-dim); background: var(--panel); border: 1px solid var(--border); border-radius: 999px; padding: 1px 9px; }
+  .kit-items[hidden] { display: none; }
+  .kit-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .kit-item { display: flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 8px; padding: 3px 4px; background: var(--panel); font-size: 12.5px; }
+  .kit-item .item-icon { width: 24px; height: 24px; margin-right: 0; }
+  .kit-item input.kit-count { width: 44px; padding: 2px 4px; font-size: 12px; text-align: center; background: var(--panel-2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; outline: none; }
+  .kit-item input.kit-count:focus { border-color: var(--accent); }
+  .kit-x { cursor: pointer; color: var(--text-dim); background: none; border: 0; padding: 0 4px; font-size: 14px; }
+  .kit-x:hover { color: #f0a0a0; }
+  .star { cursor: pointer; background: none; border: 0; font-size: 16px; color: var(--text-dim); padding: 0 6px; }
+  .star.on { color: #ffcc33; }
+  .star:hover { color: #ffcc33; }
+  .item-icon { width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border); vertical-align: middle; margin-right: 10px; background: var(--panel-2); }
+  .item-icon.none { display: inline-block; }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <nav>
+    <button data-page="dashboard" class="active"><img class="nav-ico" src="/item_icons/inv_misc_orb_blue.png" alt="">Dashboard</button>
+    <button data-page="bots"><img class="nav-ico" src="/bots_icon.png" alt="">Bots</button>
+    <button data-page="map"><img class="nav-ico" src="/item_icons/icon_treasuremap.png" alt="">Live map</button>
+    <button data-page="sidekick"><span style="color:#9070f5">◈</span>  Sidekick</button>
+    <button data-page="exilesdb" id="nav-exilesdb" style="display:none"><img class="nav-ico" src="/item_icons/inv_artifact_tome01.png" alt="">DB.Exile</button>
+    <button data-page="ascensiondb"><img class="nav-ico" src="/item_icons/inv_artifact_tome01.png" alt="">db.ascension (WIP)</button>
+    <div class="nav-heading">Server Admin</div>
+    <button data-page="accounts"><img class="nav-ico" src="/item_icons/achievement_guildperk_everybodysfriend.png" alt="">Accounts</button>
+    <button data-page="additem"><img class="nav-ico" src="/item_icons/inv_sword_39.png" alt="">Add item</button>
+    <button data-page="bans"><img class="nav-ico" src="/item_icons/inv_hammer_unique_sulfuras.png" alt="">Bans &amp; Mutes</button>
+    <button data-page="tickets"><img class="nav-ico" src="/item_icons/inv_azzar_ticket.png" alt="">Tickets</button>
+    <button data-page="realmlist"><img class="nav-ico" src="/item_icons/spell_arcane_portalstormwind.png" alt="">Realmlist</button>
+    <div class="nav-divider"></div>
+    <button data-page="configs"><img class="nav-ico" src="/item_icons/inv_misc_wrench_01.png" alt="">Configs</button>
+    <button data-page="settings"><img class="nav-ico" src="/item_icons/inv_misc_gear_01.png" alt="">Settings</button>
+  </nav>
+  <div id="sidebar-art"><img src="/sidebar_art.png?v=3" alt="" onerror="this.parentNode.style.display='none'"></div>
+  <div id="sidebar-footer">127.0.0.1:8877 &middot; local server<br>Made by Pitho<button id="sb-hide" title="Hide sidebar">«</button></div>
+</div>
+
+<div id="item-tip"></div>
+<button id="sb-show" title="Show sidebar">»</button>
+<div id="main">
+
+  <!-- DASHBOARD -->
+  <section id="page-dashboard">
+    <header class="sb-header">
+      <div class="sb-mark"><div class="sb-crest"><img src="/ascension_logo.webp" alt="" style="width:58px;height:58px;object-fit:contain" onerror="this.outerHTML='🌍'"></div>
+        <div><div class="sb-title">Azeroth<span>CoA</span></div><div class="sb-sub">Conquest of Azeroth · server control, live</div></div></div>
+      <span class="sb-pill"><i id="hdr-dot" class="off"></i><span id="hdr-services">checking services…</span></span>
+    </header>
+
+    <div class="toolbar">
+      <button class="btn btn-primary" id="btn-start-all">▶&nbsp; Start all</button>
+      <button class="btn btn-outline" id="btn-open-client"><img class="btn-icon" src="/ascension_logo.webp" alt="" onerror="this.outerHTML='🎮&nbsp;'">&nbsp; Open client</button>
+      <button class="btn btn-outline" id="btn-refresh">↻&nbsp; Refresh status</button>
+    </div>
+
+    <div class="cards" id="status-cards"></div>
+
+    <h2 class="section-heading">Consoles</h2>
+    <div class="tabs" id="console-tabs">
+      <button class="tab active" data-service="world"><img class="svc-icon" src="/api/icon?service=world" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="svc-icon-fallback" style="display:none">🌍</span>&nbsp; Worldserver</button>
+      <button class="tab" id="console-tab-world2" style="display:none" data-service="world2"><img class="svc-icon" src="/api/icon?service=world2" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="svc-icon-fallback" style="display:none">🧪</span>&nbsp; Worldserver (Realm 2)</button>
+      <button class="tab" data-service="auth"><img class="svc-icon" src="/api/icon?service=auth" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='inline'"><span class="svc-icon-fallback" style="display:none">🔐</span>&nbsp; Authserver</button>
+      <button class="tab" data-service="mysql"><span class="svc-mysql"></span>&nbsp; <span class="my-my">My</span><span class="my-sql">SQL</span></button>
+    </div>
+    <div id="console-box">Loading...</div>
+    <div id="console-input-row">
+      <input type="text" id="console-input" placeholder="Type a command...">
+      <button class="btn btn-primary" id="btn-console-send">Send</button>
+    </div>
+    <div id="console-hint" class="page-sub" style="margin-bottom:0"></div>
+  </section>
+
+  <!-- LIVE MAP -->
+  <section id="page-map" style="display:none">
+    <h1>Live map</h1>
+    <div class="card" style="padding:12px">
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+        <select id="map-view" style="display:none"></select>
+        <label><input type="checkbox" id="map-bots" checked> Bots</label>
+        <label><input type="checkbox" id="map-players" checked> Players</label>
+        <label title="Worldforged item locations (from the Sidekick data)"><input type="checkbox" id="map-wf"> ★ Worldforged</label>
+        <span style="display:inline-flex;gap:14px;align-items:center;opacity:.85"><span style="display:inline-flex;gap:6px;align-items:center"><svg width="14" height="14" viewBox="-7 -7 14 14"><circle r="5.5" fill="#ddd" stroke="#000b" stroke-width="1"/></svg>Alliance</span><span style="display:inline-flex;gap:6px;align-items:center"><svg width="16" height="16" viewBox="-8 -8 16 16"><path d="M0-7.5L7.5 0 0 7.5-7.5 0Z" fill="#ddd" stroke="#000b" stroke-width="1"/></svg>Horde</span></span><label style="display:inline-flex;gap:6px;align-items:center;opacity:.85" title="Icon size">Size <input type="range" id="map-size" min="0.4" max="2.5" step="0.05" value="1" style="width:110px"></label><label style="display:inline-flex;gap:6px;align-items:center;opacity:.85" title="Right-click the map to teleport this character there">TP <select id="map-tp"></select></label><span id="map-info" style="opacity:.7"></span>
+      </div>
+      <div id="map-layout">
+        <div id="map-wrap" style="position:relative;max-width:1002px;aspect-ratio:1002/668;background:#10141c;border:1px solid var(--border);border-radius:6px;overflow:hidden">
+          <div id="map-layers" style="position:absolute;inset:0;transform-origin:0 0">
+            <img id="map-img" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;display:none">
+          <img id="map-img2" alt="" style="position:absolute;top:0;left:50%;width:50%;height:100%;display:none">
+          </div>
+          <canvas id="map-canvas" width="1002" height="668" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+          <div id="map-menu" style="position:absolute;display:none;z-index:5;background:#181d27;border:1px solid var(--border);border-radius:6px;padding:4px;box-shadow:0 4px 14px #0009"><div id="map-menu-tp" style="padding:6px 12px;cursor:pointer;border-radius:4px;white-space:nowrap">📍 TP here</div></div>
+          <div id="map-tip" style="position:absolute;display:none;pointer-events:none;background:#000c;color:#fff;padding:3px 7px;border-radius:4px;font-size:12px;white-space:nowrap"></div>
+        </div>
+        <aside id="map-zone-box">
+          <div id="map-zone-search"><span>&#9906;</span><input type="text" id="map-zone-filter" placeholder="Filter zones..." autocomplete="off"></div>
+          <div id="map-zone-list"></div>
+        </aside>
+      </div>
+      <div style="opacity:.6;font-size:12px;margin-top:6px">Positions come from the database, so they are as fresh as <b>PlayerSaveInterval</b> in worldserver.conf.</div>
+    </div>
+  </section>
+
+  <!-- BOTS (optional module: SquidBots dashboard, vendored from github.com/Zyth45/squidbots-dashboard,
+       served by modules/squidbots on its own port -- same pattern as EXILESDB below) -->
+  <section id="page-bots" style="display:none;position:absolute;inset:0;overflow:auto">
+    <div id="bots-msg" style="display:none;padding:26px 32px"></div>
+    <iframe id="bots-frame" style="display:none;width:100%;height:100%;border:0;background:#14100a"></iframe>
+  </section>
+
+  <!-- CONFIGS -->
+  <section id="page-configs" style="display:none">
+    <h1>Configs</h1>
+    <div class="page-sub">Pick a config file to view or edit it. <kbd>Ctrl</kbd>+<kbd>S</kbd> saves, <kbd>Ctrl</kbd>+<kbd>F</kbd> searches. The first save of a file keeps a <code>.dashboard.bak</code> copy of the original next to it.</div>
+    <div id="cfg-layout">
+      <div id="cfg-side-head"><span>Files</span><span id="cfg-count"></span></div>
+      <aside id="cfg-side">
+        <div class="cfg-card">
+          <div class="cfg-search"><span>&#9906;</span><input type="text" id="cfg-filter" placeholder="Filter files..." autocomplete="off"></div>
+          <div id="config-list"></div>
+        </div>
+      </aside>
+      <div id="cfg-main">
+        <div id="cfg-bar">
+          <div id="cfg-file"><span id="config-path">No file selected</span><span id="cfg-dirty" hidden>&#9679; unsaved changes</span></div>
+          <div id="cfg-find">
+            <input type="text" id="cfg-find-input" placeholder="Find..." autocomplete="off" disabled>
+            <span id="cfg-find-count"></span>
+            <button class="cfg-icon" id="cfg-prev" title="Previous match (Shift+Enter)" disabled>&#8593;</button>
+            <button class="cfg-icon" id="cfg-next" title="Next match (Enter)" disabled>&#8595;</button>
+          </div>
+          <button class="btn btn-outline" id="btn-reload-config" disabled>Reload</button>
+          <button class="btn btn-primary" id="btn-save-config" disabled>Save</button>
+        </div>
+        <div id="cfg-editor-wrap">
+          <div id="cfg-gutter"><div id="cfg-gutter-inner"></div></div>
+          <div id="cfg-code">
+            <div id="cfg-hl"><div id="cfg-hl-inner"></div></div>
+            <textarea id="config-editor" spellcheck="false" wrap="off" autocomplete="off" autocorrect="off" autocapitalize="off" disabled></textarea>
+            <div id="cfg-empty">Pick a config file on the left.</div>
+          </div>
+        </div>
+        <div id="cfg-status"><span id="cfg-pos">Ln 1, Col 1</span><span id="cfg-info"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ACCOUNTS -->
+  <section id="page-additem" style="display:none">
+    <h1>Add item</h1>
+    <div class="page-sub">Search every item in the world database and mail it to a character. Uses the Worldserver's <code>send items</code>, so the Worldserver must be running; the character does not need to be online.</div>
+    <div class="admin-section">
+      <div class="form-row">
+        <div class="field"><label>Send to character</label><input type="text" id="item-char" list="item-char-list" placeholder="Character name"><datalist id="item-char-list"></datalist></div>
+        <div class="field narrow"><label>Count</label><input type="text" id="item-count" value="1"></div>
+      </div>
+    </div>
+    <div class="admin-section" id="fav-section">
+      <div class="kit-head"><b>★ Favorites</b><span class="page-sub" style="margin:0">Star items in the search results below for quick access. Uses the count above.</span></div>
+      <div id="fav-list"></div>
+    </div>
+    <div class="admin-section" id="kit-section">
+      <div class="kit-head"><b>📦 Kits</b><span class="page-sub" style="margin:0">Named item bundles. Add items with <i>+ Kit</i> in the search results, then send the whole kit in one go.</span></div>
+      <div class="form-row" style="margin:10px 0">
+        <div class="field"><label>New kit</label><input type="text" id="kit-new-name" maxlength="40" placeholder="Kit name (letters, numbers, spaces)"></div>
+        <div class="field narrow" style="flex:0 0 120px;align-self:flex-end"><button class="btn btn-primary" id="kit-create">Create kit</button></div>
+        <div class="field"><label>Add items to kit</label><select id="kit-target"></select></div>
+      </div>
+      <div id="kit-list"></div>
+    </div>
+    <div class="admin-section">
+      <div class="form-row">
+        <div class="field"><label>Search</label><input type="text" id="item-search" placeholder="Item name or id..."></div>
+        <div class="field narrow" style="flex:0 0 130px"><label>Quality</label><select id="item-quality"><option value="">Any</option>
+          <option value="0">Poor</option><option value="1">Common</option><option value="2">Uncommon</option><option value="3">Rare</option>
+          <option value="4">Epic</option><option value="5">Legendary</option><option value="6">Artifact</option><option value="7">Heirloom</option></select></div>
+        <div class="field narrow" style="flex:0 0 130px"><label>Type</label><select id="item-class"><option value="">Any</option>
+          <option value="2">Weapon</option><option value="4">Armor</option><option value="0">Consumable</option><option value="7">Trade goods</option>
+          <option value="9">Recipe</option><option value="3">Gem</option><option value="12">Quest</option><option value="1">Container</option>
+          <option value="16">Glyph</option><option value="15">Misc</option></select></div>
+        <div class="field narrow" style="flex:0 0 150px"><label>Subtype</label><select id="item-sub"><option value="">Any</option>
+          <optgroup label="Weapon">
+            <option value="2:0">Axe (1H)</option><option value="2:1">Axe (2H)</option><option value="2:7">Sword (1H)</option><option value="2:8">Sword (2H)</option>
+            <option value="2:4">Mace (1H)</option><option value="2:5">Mace (2H)</option><option value="2:15">Dagger</option><option value="2:13">Fist weapon</option>
+            <option value="2:6">Polearm</option><option value="2:10">Staff</option><option value="2:17">Spear</option><option value="2:2">Bow</option>
+            <option value="2:18">Crossbow</option><option value="2:3">Gun</option><option value="2:19">Wand</option><option value="2:16">Thrown</option>
+            <option value="2:20">Fishing pole</option><option value="2:14">Misc weapon</option></optgroup>
+          <optgroup label="Armor">
+            <option value="4:1">Cloth</option><option value="4:2">Leather</option><option value="4:3">Mail</option><option value="4:4">Plate</option>
+            <option value="4:6">Shield</option><option value="4:7">Libram</option><option value="4:8">Idol</option><option value="4:9">Totem</option>
+            <option value="4:10">Sigil</option><option value="4:0">Misc (rings, cloaks...)</option></optgroup></select></div>
+        <div class="field narrow" style="flex:0 0 130px"><label>Slot</label><select id="item-slot"><option value="">Any</option>
+          <option value="1">Head</option><option value="2">Neck</option><option value="3">Shoulder</option><option value="5">Chest</option>
+          <option value="6">Waist</option><option value="7">Legs</option><option value="8">Feet</option><option value="9">Wrist</option>
+          <option value="10">Hands</option><option value="11">Finger</option><option value="12">Trinket</option><option value="16">Back</option>
+          <option value="13">One-hand</option><option value="17">Two-hand</option><option value="14">Shield</option><option value="15">Ranged</option>
+          <option value="21">Main hand</option><option value="22">Off hand</option><option value="23">Held off-hand</option></select></div>
+        <div class="field narrow" style="flex:0 0 80px"><label>Req lvl from</label><input type="text" id="item-min"></div>
+        <div class="field narrow" style="flex:0 0 80px"><label>to</label><input type="text" id="item-max"></div>
+      </div>
+      <div class="form-row" style="margin-top:8px"><label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-dim)">
+        <input type="checkbox" id="item-hide" checked style="width:auto"> Hide test/deprecated items</label></div>
+      <div id="item-table-wrap"></div>
+      <div class="form-row" id="item-pager" style="justify-content:space-between;margin-top:10px"></div>
+    </div>
+  </section>
+
+  <section id="page-accounts" style="display:none">
+    <h1>Accounts</h1>
+    <div class="page-sub">Create accounts and manage GM levels. Talks directly to the database and, for account creation, to Worldserver's console.</div>
+
+    <div class="admin-section">
+      <h2>All accounts</h2>
+      <div class="hint">Ten per page. Click Edit to change an account. Bot accounts (RNDBOT...) are hidden unless ticked.</div>
+      <div class="form-row">
+        <div class="field"><input type="text" id="acc-search" placeholder="Search username or email..."></div>
+        <div class="field narrow" style="flex:0 0 150px"><label style="display:flex;align-items:center;gap:6px;margin:0 0 10px">
+          <input type="checkbox" id="acc-bots" style="width:auto"> Show bot accounts</label></div>
+      </div>
+      <div id="acc-table-wrap"></div>
+      <div class="form-row" id="acc-pager" style="justify-content:space-between;margin-top:10px"></div>
+      <div id="acc-edit" style="display:none;margin-top:16px;padding:16px;border:1px solid var(--border);border-radius:14px;background:var(--panel-2)">
+        <h2 id="acc-edit-title" style="margin-top:0"></h2>
+        <div class="form-row">
+          <div class="field"><label>Email</label><input type="text" id="acc-e-email"></div>
+          <div class="field narrow"><label>GM level</label>
+            <select id="acc-e-gm"><option value="0">0 player</option><option value="1">1 moderator</option><option value="2">2 gamemaster</option><option value="3">3 admin</option></select></div>
+          <div class="field narrow"><label>Expansion</label>
+            <select id="acc-e-exp"><option value="0">0 Classic</option><option value="1">1 TBC</option><option value="2">2 WotLK</option></select></div>
+          <div class="field narrow"><label>IP locked</label>
+            <select id="acc-e-locked"><option value="0">No</option><option value="1">Yes</option></select></div>
+        </div>
+        <div class="form-row" style="margin-top:10px">
+          <div class="field"><label>New password (leave empty to keep; needs Worldserver running)</label><input type="text" id="acc-e-pass" autocomplete="off"></div>
+          <div class="field narrow" style="flex:0 0 200px"><button class="btn btn-primary" id="acc-e-save" style="width:100%">Save</button></div>
+          <div class="field narrow" style="flex:0 0 110px"><button class="btn btn-outline" id="acc-e-cancel" style="width:100%">Cancel</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h2>Create account</h2>
+      <div class="hint">Sends "account create" to the Worldserver console -- Worldserver must be started (from Dashboard) first.</div>
+      <div class="form-row">
+        <div class="field"><label>Username</label><input type="text" id="acc-user"></div>
+        <div class="field"><label>Password</label><input type="text" id="acc-pass"></div>
+        <div class="field narrow"><button class="btn btn-primary" id="btn-create-account" style="width:100%">Create</button></div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h2>GM level</h2>
+      <div class="hint">Sets account_access.gmlevel (0=player, 1=moderator, 2=gamemaster, 3=admin).</div>
+      <div class="form-row">
+        <div class="field"><label>Username</label><input type="text" id="gm-user"></div>
+        <div class="field narrow">
+          <label>Level</label>
+          <select id="gm-level">
+            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
+          </select>
+        </div>
+        <div class="field narrow"><label>Realm ID</label><input type="text" id="gm-realm" value="-1"></div>
+        <div class="field narrow"><button class="btn btn-primary" id="btn-set-gmlevel" style="width:100%">Set</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BANS & MUTES -->
+  <section id="page-bans" style="display:none">
+    <h1>Bans &amp; Mutes</h1>
+    <div class="page-sub">Add a new ban, or remove one from the lists below.</div>
+
+    <div class="admin-section">
+      <div class="form-row">
+        <div class="field narrow">
+          <label>Type</label>
+          <select id="ban-type">
+            <option value="account">Account</option>
+            <option value="ip">IP</option>
+            <option value="character">Character</option>
+            <option value="mute">Mute (account)</option>
+          </select>
+        </div>
+        <div class="field"><label>Username / IP / Character</label><input type="text" id="ban-name"></div>
+        <div class="field"><label>Reason</label><input type="text" id="ban-reason" value="no reason"></div>
+        <div class="field narrow"><label>Duration (h, 0=perm)</label><input type="text" id="ban-duration" value="0"></div>
+        <div class="field narrow"><button class="btn btn-danger" id="btn-add-ban" style="width:100%">Ban</button></div>
+      </div>
+      <div class="admin-tabs" style="margin-top:16px">
+        <button class="tab active" data-bantab="account">Accounts</button>
+        <button class="tab" data-bantab="ip">IPs</button>
+        <button class="tab" data-bantab="character">Characters</button>
+        <button class="tab" data-bantab="muted">Muted</button>
+      </div>
+      <div id="ban-table-wrap"></div>
+    </div>
+  </section>
+
+  <!-- TICKETS -->
+  <section id="page-tickets" style="display:none">
+    <h1>Tickets</h1>
+    <div class="page-sub">Open player help requests (GM tickets).</div>
+    <div class="admin-section">
+      <div id="ticket-table-wrap"></div>
+    </div>
+  </section>
+
+  <!-- COA SIDEKICK (offline mirror of ascensionsidekick.com, served from /sidekick/) -->
+  <section id="page-sidekick" style="display:none;margin:-26px -32px">
+    <iframe id="sidekick-frame" style="display:block;width:100%;height:100vh;border:0;background:#0d0f14"></iframe>
+  </section>
+
+  <!-- REALMLIST -->
+  <section id="page-realmlist" style="display:none">
+    <h1>Realmlist</h1>
+    <div class="page-sub">Edit realm address, port, and online flag (0 = online, 2 = offline).</div>
+    <div class="admin-section">
+      <div id="realm-table-wrap"></div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <!-- EXILESDB (optional module: offline copy of db.exil.es, served by modules/exilesdb on its own port) -->
+  <section id="page-exilesdb" style="display:none;margin:-26px -32px">
+    <div id="exilesdb-msg" style="display:none;padding:26px 32px"></div>
+    <iframe id="exilesdb-frame" style="display:none;width:100%;height:100vh;border:0;background:#0c0d10"></iframe>
+  </section>
+
+  <!-- DB.ASCENSION.GG (optional module: offline mirror of db.ascension.gg, ~3.2k item/spell/quest/npc/
+       guide pages crawled from the Wayback Machine and served locally from ascensiondb/. The live site
+       sends X-Frame-Options: DENY so it can never be iframed directly -- and was down outright when
+       this was captured -- hence the local copy. Pages not in the mirror show a "not archived" page
+       with a link out to the live site (see ascensiondb/not_archived.html).) -->
+  <section id="page-ascensiondb" style="display:none;margin:-26px -32px">
+    <iframe id="ascensiondb-frame" style="display:block;width:100%;height:100vh;border:0;background:#0c0d10"></iframe>
+  </section>
+
+  <section id="page-settings" style="display:none">
+    <h1>Settings</h1>
+    <div class="page-sub">Paths to the server install, configs, MySQL, and the game client.</div>
+    <div class="settings-form">
+      <div class="field">
+        <label>Auth/World install directory (where authserver.exe / worldserver.exe live)</label>
+        <div class="path-row"><input type="text" id="set-install_dir"><button class="btn btn-outline btn-sm" type="button" data-browse-folder="set-install_dir">Browse…</button></div>
+      </div>
+      <div class="field">
+        <label>Authserver executable (optional override; defaults to authserver.exe in the install directory above)</label>
+        <div class="path-row"><input type="text" id="set-authserver_exe" placeholder="leave empty to use the install directory"><button class="btn btn-outline btn-sm" type="button" data-browse-file="set-authserver_exe">Browse…</button></div>
+      </div>
+      <div class="field">
+        <label>Worldserver executable (optional override; defaults to worldserver.exe in the install directory above)</label>
+        <div class="path-row"><input type="text" id="set-worldserver_exe" placeholder="leave empty to use the install directory"><button class="btn btn-outline btn-sm" type="button" data-browse-file="set-worldserver_exe">Browse…</button></div>
+      </div>
+      <div class="field">
+        <label>Second realm's worldserver.exe (only if you run two realms; leave empty to hide it entirely)</label>
+        <div class="path-row"><input type="text" id="set-worldserver2_exe" placeholder="e.g. E:\AzerothCoreCOA\install2\worldserver.exe"><button class="btn btn-outline btn-sm" type="button" data-browse-file="set-worldserver2_exe">Browse…</button></div>
+      </div>
+      <div class="field">
+        <label>Configs directory</label>
+        <div class="path-row"><input type="text" id="set-configs_dir"><button class="btn btn-outline btn-sm" type="button" data-browse-folder="set-configs_dir">Browse…</button></div>
+      </div>
+      <div class="field">
+        <label>MySQL directory (where mysql-8.4.11 lives)</label>
+        <div class="path-row"><input type="text" id="set-mysql_dir"><button class="btn btn-outline btn-sm" type="button" data-browse-folder="set-mysql_dir">Browse…</button></div>
+      </div>
+      <div class="field">
+        <label>MySQL data directory</label>
+        <div class="path-row"><input type="text" id="set-mysql_data_dir"><button class="btn btn-outline btn-sm" type="button" data-browse-folder="set-mysql_data_dir">Browse…</button></div>
+      </div>
+      <div class="field">
+        <label>Client executable (Ascension.exe)</label>
+        <div class="path-row"><input type="text" id="set-client_exe"><button class="btn btn-outline btn-sm" type="button" data-browse-file="set-client_exe">Browse…</button></div>
+      </div>
+      <div style="display:flex; gap:12px">
+        <div class="field" style="flex:1">
+          <label>MySQL host</label>
+          <input type="text" id="set-mysql_host">
+        </div>
+        <div class="field" style="flex:1">
+          <label>MySQL port</label>
+          <input type="text" id="set-mysql_port">
+        </div>
+      </div>
+      <div style="display:flex; gap:12px">
+        <div class="field" style="flex:1">
+          <label>MySQL user</label>
+          <input type="text" id="set-mysql_user">
+        </div>
+        <div class="field" style="flex:1">
+          <label>MySQL password</label>
+          <input type="password" id="set-mysql_password">
+        </div>
+      </div>
+      <div id="set-exilesdb-group" style="display:none">
+        <div class="field">
+          <label>ExilesDB data folder (optional module; contains data/ and mirror/, about 13 GB)</label>
+          <div class="path-row"><input type="text" id="set-exilesdb_path" placeholder="e.g. D:\ExilesOfflineDB"><button class="btn btn-outline btn-sm" type="button" data-browse-folder="set-exilesdb_path">Browse…</button></div>
+        </div>
+        <div class="field">
+          <label>ExilesDB port</label>
+          <input type="text" id="set-exilesdb_port">
+        </div>
+      </div>
+      <div class="row">
+        <button class="btn btn-primary" id="btn-save-settings">Save settings</button>
+        <button class="btn btn-outline" id="btn-run-wizard" type="button">Run setup wizard…</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="setup-wizard" class="wizard-overlay" style="display:none">
+  <div class="wizard-box">
+    <div class="wizard-dots" id="wiz-dots"></div>
+
+    <div class="wizard-panel" data-panel="1">
+      <h1>Welcome</h1>
+      <div class="page-sub">Let's find your server files so the dashboard knows where everything is. You can re-run this any time from Settings.</div>
+      <p style="color:var(--text-dim);font-size:13px;line-height:1.6">This will ask where four things live: the server (authserver.exe / worldserver.exe), MySQL, your WoW client, and (optionally) an ExilesDB archive. Nothing is saved until the last step.</p>
+    </div>
+
+    <div class="wizard-panel" data-panel="2" style="display:none">
+      <h1>Server files</h1>
+      <div class="page-sub">The folder containing authserver.exe and worldserver.exe.</div>
+      <div class="field">
+        <label>Install directory</label>
+        <div class="path-row"><input type="text" id="wiz-install_dir"><button class="btn btn-outline btn-sm" type="button" data-wiz-browse-folder="wiz-install_dir" data-wiz-title="Select the folder with authserver.exe and worldserver.exe">Browse…</button></div>
+      </div>
+      <div class="field">
+        <label>Configs directory (usually "configs" inside the install directory)</label>
+        <div class="path-row"><input type="text" id="wiz-configs_dir"><button class="btn btn-outline btn-sm" type="button" data-wiz-browse-folder="wiz-configs_dir" data-wiz-title="Select the configs folder">Browse…</button></div>
+      </div>
+      <div id="wiz-server-check" class="wizard-check"></div>
+      <div class="field">
+        <label>Authserver executable <span style="color:var(--text-dim);font-weight:400">(optional; only if it's not directly in the install directory)</span></label>
+        <div class="path-row"><input type="text" id="wiz-authserver_exe" placeholder="leave empty to use the install directory"><button class="btn btn-outline btn-sm" type="button" data-wiz-browse-file="wiz-authserver_exe" data-wiz-title="Select authserver.exe" data-wiz-filter="Programs (*.exe)|*.exe">Browse…</button></div>
+      </div>
+      <div class="field">
+        <label>Worldserver executable <span style="color:var(--text-dim);font-weight:400">(optional; only if it's not directly in the install directory)</span></label>
+        <div class="path-row"><input type="text" id="wiz-worldserver_exe" placeholder="leave empty to use the install directory"><button class="btn btn-outline btn-sm" type="button" data-wiz-browse-file="wiz-worldserver_exe" data-wiz-title="Select worldserver.exe" data-wiz-filter="Programs (*.exe)|*.exe">Browse…</button></div>
+      </div>
+      <div class="field">
+        <label>Second realm's worldserver.exe <span style="color:var(--text-dim);font-weight:400">(optional; only if you run two realms)</span></label>
+        <div class="path-row"><input type="text" id="wiz-worldserver2_exe" placeholder="leave empty if you only run one realm"><button class="btn btn-outline btn-sm" type="button" data-wiz-browse-file="wiz-worldserver2_exe" data-wiz-title="Select the second realm's worldserver.exe" data-wiz-filter="Programs (*.exe)|*.exe">Browse…</button></div>
+      </div>
+    </div>
+
+    <div class="wizard-panel" data-panel="3" style="display:none">
+      <h1>MySQL</h1>
+      <div class="page-sub">Where MySQL is installed, and the login for the game databases.</div>
+      <div class="field">
+        <label>MySQL directory (the folder with a "bin" subfolder containing mysql.exe)</label>
+        <div class="path-row"><input type="text" id="wiz-mysql_dir"><button class="btn btn-outline btn-sm" type="button" data-wiz-browse-folder="wiz-mysql_dir" data-wiz-title="Select the MySQL folder">Browse…</button></div>
+      </div>
+      <div class="field">
+        <label>MySQL data directory</label>
+        <div class="path-row"><input type="text" id="wiz-mysql_data_dir"><button class="btn btn-outline btn-sm" type="button" data-wiz-browse-folder="wiz-mysql_data_dir" data-wiz-title="Select the MySQL data folder">Browse…</button></div>
+      </div>
+      <div style="display:flex;gap:12px">
+        <div class="field" style="flex:1"><label>Host</label><input type="text" id="wiz-mysql_host" value="127.0.0.1"></div>
+        <div class="field" style="flex:1"><label>Port</label><input type="text" id="wiz-mysql_port" value="3306"></div>
+      </div>
+      <div style="display:flex;gap:12px">
+        <div class="field" style="flex:1"><label>User</label><input type="text" id="wiz-mysql_user" value="acore"></div>
+        <div class="field" style="flex:1"><label>Password</label><input type="password" id="wiz-mysql_password" value="acore"></div>
+      </div>
+      <div class="row">
+        <button class="btn btn-outline btn-sm" type="button" id="wiz-test-mysql">Test connection</button>
+        <span id="wiz-mysql-result" class="wizard-check"></span>
+      </div>
+    </div>
+
+    <div class="wizard-panel" data-panel="4" style="display:none">
+      <h1>Game client</h1>
+      <div class="page-sub">Used by the "Open client" button. Optional -- leave empty to skip.</div>
+      <div class="field">
+        <label>Client executable</label>
+        <div class="path-row"><input type="text" id="wiz-client_exe"><button class="btn btn-outline btn-sm" type="button" data-wiz-browse-file="wiz-client_exe" data-wiz-title="Select the game client .exe" data-wiz-filter="Programs (*.exe)|*.exe">Browse…</button></div>
+      </div>
+    </div>
+
+    <div class="wizard-panel" data-panel="5" style="display:none">
+      <h1>ExilesDB <span style="color:var(--text-dim);font-weight:400">(optional)</span></h1>
+      <div class="page-sub">An offline item/spell/quest database. Leave empty if you don't have it -- the tab just stays hidden.</div>
+      <div class="field">
+        <label>ExilesDB data folder (contains data/ and mirror/)</label>
+        <div class="path-row"><input type="text" id="wiz-exilesdb_path"><button class="btn btn-outline btn-sm" type="button" data-wiz-browse-folder="wiz-exilesdb_path" data-wiz-title="Select the ExilesDB data folder">Browse…</button></div>
+      </div>
+    </div>
+
+    <div class="wizard-panel" data-panel="6" style="display:none">
+      <h1>All set</h1>
+      <div class="page-sub">Here's what will be saved.</div>
+      <div id="wiz-summary" class="wizard-summary"></div>
+    </div>
+
+    <div class="wizard-nav">
+      <button class="btn btn-outline" id="wiz-back" type="button">Back</button>
+      <span id="wiz-error" class="wizard-error"></span>
+      <button class="btn btn-primary" id="wiz-next" type="button">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>

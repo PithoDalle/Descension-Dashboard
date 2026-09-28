@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Maintenance - Ascension DB</title>
+    <link rel="icon" type="image/png" href="/ascensiondb/static/images/maintenance/iconmaintenance.png" />
+    <link href="/ascensiondb/static/css/fontawesome/css/fontawesome.css" rel="stylesheet">
+    <link href="/ascensiondb/static/css/fontawesome/css/brands.css" rel="stylesheet">
+    <link href="/ascensiondb/static/css/fontawesome/css/regular.css" rel="stylesheet">
+    <link href="/ascensiondb/static/css/fontawesome/css/solid.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/ascensiondb/static/css/aowow.css?833" />
+    <style>
+        html {
+            background-color: transparent;
+
+        }
+
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            font-family: 'Roboto', sans-serif;
+            background-attachment: fixed;
+            background-color: #161618;
+            background-image: url("/ascensiondb/static/images/redesign/maintenance.jpg");
+            background-repeat: no-repeat;
+            background-size: cover;
+
+            height: 65vh;
+            text-shadow: var(--text-shadow);
+            color: var(--text);
+            font-size: 1.3em;
+            padding: 20px;
+        }
+
+        .main-maintenance {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            padding: 50px 20px;
+            border-radius: 0.25em;
+            background-color: var(--bg-darker-transparent);
+            border: 2px solid var(--border-yellow-alt);
+            flex-wrap: wrap;
+            box-shadow: var(--box-shadow);
+        }
+
+        .main-maintenance hr {
+            width: 100%;
+            border: 1px solid var(--border);
+            margin: 20px 0;
+        }
+
+
+        .main-maintenance img {
+            width: 450px;
+        }
+
+        .main-maintenance .maintenance div {
+
+            font-weight: bold;
+            padding: 20px;
+            font-size: 1.1em;
+        }
+
+        .main-maintenance .maintenance p {
+            font-size: 1.1em;
+
+        }
+
+        .main-maintenance .maintenance h1 {
+            color: var(--link);
+            font-size: 1.3em;
+            text-shadow: var(--text-shadow);
+            max-width: 800px;
+
+        }
+
+
+
+        .main-maintenance .buttons a {
+            font-size: 0.8em;
+            padding: 10px 25px 10px 25px;
+            color: var(--text);
+            background-color: var(--bg-transparant-extra);
+            border: 1px solid var(--border-yellow-alt);
+            text-decoration: none;
+            border-radius: 0.15em;
+            transition: 0.2s;
+            box-shadow: var(--box-shadow);
+        }
+
+        .main-maintenance .buttons {
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            justify-content: center;
+            gap: 0.5em;
+        }
+
+
+        .main-maintenance .fa-solid {
+            color: var(--icon);
+        }
+
+        .main-maintenance .buttons a:hover .fa-solid {
+            color: var(--link) !important;
+        }
+
+
+        .main-maintenance .buttons a:hover {
+            cursor: pointer;
+            border-color: var(--border-yellow);
+        }
+
+
+        .maintenance {
+            max-width: 750px;
+        }
+
+        .maintenance-info {
+            max-width: 1000px;
+            font-size: 1em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--bg-darker-transparent);
+            color: var(--link);
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--bg-transparant-extra);
+        }
+
+        tr:hover {
+            background-color: var(--bg-hover);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-maintenance">
+                    <img src="/ascensiondb/static/images/logos/ascension_default.png">
+            <div class="maintenance">
+                <h1>Ascension Database is undergoing maintenance </h1>
+                <p style="margin-bottom: 10px;">We apologize for any inconvenience this may cause.</p>
+                <!-- View maintenance info -->
+                <a href="/?update-schedule"><i class="fa-solid fa-calendar-days"></i> Maintenance Schedule</a>
+                <hr />
+                <b>Status: </b>Updating spellaffect, spellranks, mystic_enchant, spell, spell_coa, pvpmods data.                <div style="margin-top: 20px" class="buttons">
+                    <a target="_blank" href="https://ascension.gg">Ascension.gg</a>
+                    <a href="/"><i class="fa-solid fa-arrows-rotate"></i></a>
+                </div>
+
+
+            </div>
+        
+            </div>
+<script src="/ascensiondb/static/interceptor.js"></script>
+</body>
+
+</html>

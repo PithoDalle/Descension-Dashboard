@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Not archived - Ascension Database</title>
+<style>
+  body { background:#0c0d10; color:#cfd3da; font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+  .box { max-width:520px; text-align:center; padding:32px; }
+  h1 { font-size:20px; margin:0 0 12px; color:#fff; }
+  p { line-height:1.5; color:#9aa1ad; }
+  a.btn { display:inline-block; margin-top:18px; padding:10px 20px; background:#3a6ff0; color:#fff; text-decoration:none; border-radius:6px; }
+  a.btn:hover { background:#5a89ff; }
+  a.home { display:block; margin-top:14px; color:#6b93ff; text-decoration:none; font-size:13px; }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1>This page wasn't captured in the offline snapshot</h1>
+    <p>This is a static mirror built from whatever the Wayback Machine happened to archive of db.ascension.gg. This particular page isn't among those captures.</p>
+    <a class="btn" id="live-link" href="https://db.ascension.gg/" target="_blank" rel="noopener">Open on the live site</a>
+    <a class="home" href="/ascensiondb/">&larr; Back to the mirrored homepage</a>
+  </div>
+  <script>
+    try {
+      var q = window.location.search || '';
+      document.getElementById('live-link').href = 'https://db.ascension.gg/' + q;
+    } catch (e) {}
+  </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+'use strict';(function(root){var QCOLOR={0:'#9d9d9d',1:'#ffffff',2:'#1eff00',3:'#0070dd',4:'#a335ee',5:'#ff8000',6:'#e6cc80',7:'#e6cc80'};function qualityColor(q){return QCOLOR[q]!=null?QCOLOR[q]:QCOLOR[1];}
+function itemList(store){var items=(store&&store.items)||{};return Object.keys(items).map(function(k){return items[k];}).sort(function(a,b){return String(a.name).localeCompare(String(b.name));});}
+function matchesFilters(it,f){f=f||{};if(f.category&&f.category.length&&f.category.indexOf(it.category)<0)return false;if(f.slot&&f.slot.length&&f.slot.indexOf(it.slot)<0)return false;if(f.type&&f.type.length&&f.type.indexOf(it.subtype)<0)return false;if(f.quality&&f.quality.length&&f.quality.indexOf(it.quality)<0)return false;if(f.q){if(String(it.name).toLowerCase().indexOf(String(f.q).toLowerCase())<0)return false;}
+return true;}
+function zoneRollup(list){var byContinent={},byZone={};list.forEach(function(it){(it.locations||[]).forEach(function(loc){byContinent[loc.c]=(byContinent[loc.c]||0)+1;byZone[loc.z]=(byZone[loc.z]||0)+1;});});return{byContinent:byContinent,byZone:byZone};}
+var api={itemList:itemList,matchesFilters:matchesFilters,zoneRollup:zoneRollup,qualityColor:qualityColor};if(typeof module!=='undefined'&&module.exports)module.exports=api;root.WF=api;})(typeof window!=='undefined'?window:this);

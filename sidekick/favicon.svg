@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Sidekick">
+  <defs>
+    <linearGradient id="gem" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c9bcff"/>
+      <stop offset=".55" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#6d28d9"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="52%">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#151226"/>
+  <circle cx="32" cy="32" r="23" fill="url(#glow)"/>
+  <!-- crystal: centered, top y15 / bottom y49, shoulders y31 -->
+  <path d="M32 15 L50 31 L32 49 L14 31 Z" fill="url(#gem)"/>
+  <!-- upper facet, brighter -->
+  <path d="M32 15 L50 31 L14 31 Z" fill="#ffffff" opacity=".16"/>
+  <!-- inner triangle -->
+  <path d="M32 22 L42 31 L22 31 Z" fill="#ffffff" opacity=".13"/>
+  <!-- facet lines converging to the bottom point -->
+  <g stroke="#3c1a7a" stroke-width=".9" opacity=".55" fill="none">
+    <path d="M22 31 L32 49"/><path d="M42 31 L32 49"/><path d="M32 31 L32 49"/>
+  </g>
+  <!-- the light -->
+  <circle cx="32" cy="26" r="2.8" fill="#fff"/>
+</svg>

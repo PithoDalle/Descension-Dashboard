@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SquidBots – Conquest of Azeroth</title>
+<link rel="stylesheet" href="static/dashboard.css">
+<link rel="stylesheet" href="static/local-fixes.css">
+</head>
+<body>
+<div class="app">
+
+<nav class="side" aria-label="Pages">
+  <a class="brand" href="#world">
+    <span class="crest" aria-hidden="true">🦑</span>
+    <span class="brand-words">
+      <span class="brand-name">Squid<b>Bots</b></span>
+      <span class="tagline" data-i18n="tagline"></span>
+    </span>
+  </a>
+  <a class="nav-link" href="#world"><i class="ico" data-icon="world" aria-hidden="true"></i><span data-i18n="navWorld"></span></a>
+  <a class="nav-link" href="#bots"><i class="ico" data-icon="bots" aria-hidden="true"></i><span data-i18n="navBots"></span></a>
+  <!-- private:start -->
+  <a class="nav-link" href="#gear"><i class="ico" data-icon="gear" aria-hidden="true"></i><span data-i18n="navGear"></span></a>
+  <!-- private:end -->
+  <a class="nav-link" href="#stats"><i class="ico" data-icon="stats" aria-hidden="true"></i><span data-i18n="navStats"></span></a>
+  <a class="nav-link" href="#chat"><i class="ico" data-icon="chat" aria-hidden="true"></i><span data-i18n="navChat"></span></a>
+  <!-- private:start --><a class="nav-link" href="#settings"><i class="ico" data-icon="settings" aria-hidden="true"></i><span data-i18n="navSettings"></span></a><!-- private:end -->
+</nav>
+
+<div class="content">
+  <header class="topbar">
+    <h1 id="pageTitle"></h1>
+    <div class="search">
+      <input id="search" type="search" autocomplete="off" data-i18n-placeholder="searchBot" data-i18n-aria="searchBot">
+      <div class="results" id="results" hidden></div>
+    </div>
+    <span class="pill"><span class="dot live" id="stateDot"></span><span id="stateText"></span></span>
+    <span class="pill quiet" id="updatedPill">-</span>
+    <button class="btn small" id="langButton" type="button">FR</button>
+  </header>
+
+  <div class="banner" id="offlineBanner" hidden></div>
+
+  <main class="page" data-page="world">
+    <div id="build" hidden></div>
+    <div class="figures" id="figures"></div>
+    <div class="world-layout">
+      <section class="card">
+        <h2><span data-i18n="mapTitle"></span> <span class="sub" id="mapSub"></span></h2>
+        <div class="tabs" role="tablist" id="mapTabs"></div>
+        <!-- private:start --><div class="art-prompt" id="artPrompt" hidden></div><!-- private:end -->
+        <div class="map-layout">
+          <div id="mapHolder"></div>
+          <div id="mapZones"></div>
+        </div>
+        <div id="mapElsewhere"></div>
+      </section>
+      <section class="card focus" id="focusPanel">
+        <h2><span data-i18n="focusTitle"></span> <span class="sub" data-focus-name></span></h2>
+        <div data-focus-card><p class="empty" data-i18n="focusNone"></p></div>
+      </section>
+    </div>
+  </main>
+
+  <main class="page" data-page="bots" hidden>
+    <div class="bots-layout">
+    <section class="card">
+      <h2><span data-i18n="rosterTitle"></span> <span class="sub" id="rosterSub"></span></h2>
+      <div class="toolbar">
+        <input id="rosterFilter" type="search" autocomplete="off" data-i18n-placeholder="rosterFilter" data-i18n-aria="rosterFilter">
+        <div class="tabs" role="tablist" id="rosterSort">
+          <button role="tab" data-key="level" aria-selected="true" data-i18n="sortLevel"></button>
+          <button role="tab" data-key="name" aria-selected="false" data-i18n="sortName"></button>
+          <button role="tab" data-key="zone" aria-selected="false" data-i18n="sortZone"></button>
+        </div>
+        <label class="roster-offline-toggle"><input type="checkbox" id="rosterOffline"> <span data-i18n="showOffline"></span></label>
+      </div>
+      <div class="scroll" id="roster"></div>
+    </section>
+    <section class="card focus">
+      <h2><span data-i18n="focusTitle"></span> <span class="sub" data-focus-name></span></h2>
+      <div data-focus-card><p class="empty" data-i18n="focusNone"></p></div>
+    </section>
+    </div>
+  </main>
+
+  <!-- private:start -->
+  <main class="page" data-page="gear" hidden>
+    <div class="armory-panel">
+      <div id="gearBody"></div>
+      <div class="gear-search-wrap">
+        <div class="gear-search-input">
+          <input id="gearSearch" type="search" autocomplete="off" placeholder="Bot name...">
+          <div class="results" id="gearSearchResults" hidden></div>
+        </div>
+        <button class="btn small" type="button" id="gearBrowseOpen">All characters</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="gearBrowsePicker" hidden>
+    <div class="modal-box">
+      <div class="toolbar" style="justify-content:space-between;align-items:center">
+        <h2 id="gearBrowseTitle" style="margin:0">All characters</h2>
+        <button class="btn small" type="button" id="gearBrowseClose">Close</button>
+      </div>
+      <input id="gearBrowseSearch" type="search" autocomplete="off" placeholder="Filter by name...">
+      <div class="browse-filters">
+        <input id="gearBrowseMinLevel" type="number" min="1" max="255" placeholder="Min level">
+        <input id="gearBrowseMaxLevel" type="number" min="1" max="255" placeholder="Max level">
+        <select id="gearBrowseClass"><option value="">All classes</option></select>
+        <select id="gearBrowseRole">
+          <option value="">All roles</option>
+          <option value="tank">Tank</option>
+          <option value="heal">Healer</option>
+          <option value="dps">Damage</option>
+          <option value="none">No spec</option>
+        </select>
+      </div>
+      <div id="gearBrowseResults"></div>
+      <div class="toolbar" id="gearBrowsePager" style="justify-content:space-between;margin-top:10px"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="gearPicker" hidden>
+    <div class="modal-box">
+      <div class="toolbar" style="justify-content:space-between;align-items:center">
+        <h2 id="gearPickerTitle" style="margin:0">Choose an item</h2>
+        <button class="btn small" type="button" id="gearPickerClose">Close</button>
+      </div>
+      <input id="gearPickerSearch" type="search" autocomplete="off" placeholder="Item name or id...">
+      <div id="gearPickerResults"></div>
+      <div class="toolbar" id="gearPickerPager" style="justify-content:space-between;margin-top:10px"></div>
+    </div>
+  </div>
+  <!-- private:end -->
+
+  <main class="page" data-page="stats" hidden>
+    <div class="grid two">
+      <section class="card">
+        <h2><span data-i18n="paceTitle"></span> <span class="sub" id="paceSub"></span></h2>
+        <div class="chart" id="paceChart"></div>
+      </section>
+      <section class="card">
+        <h2><span data-i18n="factionsTitle"></span> <span class="sub" data-i18n="factionsSub"></span></h2>
+        <div class="splits" id="factions"></div>
+        <h2 class="later"><span data-i18n="rolesTitle"></span> <span class="sub" data-i18n="rolesSub"></span></h2>
+        <div class="splits" id="roles"></div>
+      </section>
+    </div>
+    <div class="grid two">
+      <section class="card">
+        <h2><span data-i18n="zonesTitle"></span> <span class="sub" data-i18n="zonesSub"></span></h2>
+        <div id="zones"></div>
+      </section>
+      <section class="card">
+        <h2><span data-i18n="compareTitle"></span> <span class="sub" data-i18n="compareSub"></span></h2>
+        <div id="compare"></div>
+        <h2 class="later"><span data-i18n="deadTitle"></span> <span class="sub" data-i18n="deadSub"></span></h2>
+        <div class="chart" id="deadChart"></div>
+      </section>
+    </div>
+    <div class="grid two">
+      <section class="card">
+        <h2><span data-i18n="progressTitle"></span> <span class="sub" id="progressSub"></span></h2>
+        <div class="chart" id="levelsChart"></div>
+      </section>
+      <section class="card">
+        <h2><span data-i18n="levelsTitle"></span> <span class="sub" data-i18n="levelsSub"></span></h2>
+        <div class="levels" id="levelBars"></div>
+      </section>
+    </div>
+    <div class="grid two">
+      <section class="card">
+        <h2><span data-i18n="xpTitle"></span> <span class="sub" id="xpSub"></span></h2>
+        <div id="xpRate"></div>
+      </section>
+      <section class="card">
+        <h2><span data-i18n="spellsTitle"></span> <span class="sub" id="actionsSub"></span></h2>
+        <div id="actions"></div>
+      </section>
+    </div>
+    <div class="grid two">
+      <section class="card">
+        <h2><span data-i18n="watchTitle"></span> <span class="sub" data-i18n="watchSub"></span></h2>
+        <div class="watch" id="watch"></div>
+        <div id="stuckNames"></div>
+        <ul class="events" id="incidents"></ul>
+      </section>
+      <section class="card">
+        <h2><span data-i18n="topTitle"></span> <span class="sub" data-i18n="topSub"></span></h2>
+        <div class="tabs" role="tablist" id="topTabs">
+          <button role="tab" data-key="xp" aria-selected="true" data-i18n="tabXp"></button>
+          <button role="tab" data-key="kills" aria-selected="false" data-i18n="tabKills"></button>
+          <button role="tab" data-key="quests" aria-selected="false" data-i18n="tabQuests"></button>
+        </div>
+        <div id="top"></div>
+      </section>
+    </div>
+    <section class="card">
+      <h2><span data-i18n="classesTitle"></span> <span class="sub" data-i18n="classesSub"></span></h2>
+      <div class="scroll" id="classes"></div>
+    </section>
+  </main>
+
+  <main class="page" data-page="chat" hidden>
+    <!-- private:start -->
+    <section class="card" id="feedCard">
+      <h2><span data-i18n="feedTitle"></span> <span class="sub" id="feedSub"></span></h2>
+      <div class="toolbar">
+        <div class="tabs" role="tablist" id="feedKinds">
+          <button role="tab" data-kind="" aria-selected="true" data-i18n="feedAll"></button>
+          <button role="tab" data-kind="say,yell" aria-selected="false" data-i18n="feedSay"></button>
+          <button role="tab" data-kind="whisper" aria-selected="false" data-i18n="feedWhisper"></button>
+          <button role="tab" data-kind="channel,party,guild" aria-selected="false" data-i18n="feedChannels"></button>
+        </div>
+        <input id="feedSearch" type="search" autocomplete="off" data-i18n-placeholder="feedSearch" data-i18n-aria="feedSearch">
+      </div>
+      <div class="feed" id="feed"></div>
+    </section>
+    <!-- private:end -->
+    <div class="grid wide">
+      <section class="card">
+        <h2><span data-i18n="chatTitle"></span> <span class="sub" id="chatSub"></span></h2>
+        <div id="chat"></div>
+      </section>
+      <section class="card">
+        <h2><span data-i18n="lootTitle"></span> <span class="sub" id="lootSub"></span></h2>
+        <div id="loot"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- private:start -->
+  <main class="page" data-page="settings" hidden>
+    <section class="card">
+      <h2><span data-i18n="settingsTitle"></span> <span class="sub" id="settingsSub"></span></h2>
+      <div id="settingsNotes"></div>
+      <div id="recipes"></div>
+      <div id="settings"></div>
+      <div class="settings-actions">
+        <button class="btn" type="button" id="settingsReload" data-i18n="reload"></button>
+        <button class="btn primary" type="button" id="settingsApply" disabled data-i18n="applyChanges"></button>
+        <span id="settingsStatus"></span>
+      </div>
+    </section>
+    <section class="card" id="artCard">
+      <h2>Maps <span class="sub" id="artSub"></span></h2>
+      <div id="artPanel"></div>
+    </section>
+  </main>
+  <!-- private:end -->
+
+  <footer id="footer"></footer>
+</div>
+</div>
+
+<dialog id="sheet"><div class="sheet" id="sheetBody"></div></dialog>
+
+<script src="static/dashboard.js"></script>
+<!-- private:start --><script src="static/local-gear.js"></script><!-- private:end -->
+</body>
+</html>

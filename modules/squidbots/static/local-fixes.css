@@ -1,0 +1,255 @@
+/* Local-only reskin: matches the parent AzerothCoreCOA dashboard's dark blue/gray look instead of
+   upstream's gold-and-parchment "control room" theme, so the Bots tab doesn't feel like a
+   different app inside an iframe. Loaded after dashboard.css in index.html -- never edited
+   upstream's own dashboard.css, so a future `git diff` against Zyth45/squidbots-dashboard stays
+   readable. See [[dashboard-squidbots-module]].
+
+   Values below are copied from the parent dashboard's own :root (index.html). */
+:root {
+  --page: #0c0d10;
+  --page-glow: rgba(74, 163, 255, .13);
+  --surface: #15161a;
+  --surface-2: #1d1f25;
+  --surface-3: #262832;
+  --text-primary: #f6f5f2;
+  --text-secondary: #c7c5be;
+  --text-muted: #85827a;
+  --border: rgba(255, 255, 255, .11);
+  --hairline: rgba(255, 255, 255, .06);
+  --grid: #23252c;
+  --axis: #3a3d47;
+  --gold: #4aa3ff;
+  --gold-bright: #7cc4ff;
+  --gold-deep: #2a6bb3;
+  --alliance: #3987e5;
+  --horde: #e05a4a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 18px 40px rgba(0, 0, 0, .35);
+  --display: var(--body);
+  /* Corner-bracket frame as a tiny SVG, sliced into a border-image on .armory-model only (the
+     portrait box) -- the user asked to keep this specific frame around the character image even
+     after the rest of the app moved to plain bordered cards. width/height are set explicitly so
+     border-image-slice divides a real 32x32 image instead of a size-less SVG (an SVG with only a
+     viewBox has no CSS intrinsic size, which made an earlier version of this stretch across the
+     whole edge instead of just the corners). */
+  --corner-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke='%237cc4ff' stroke-width='2' stroke-linecap='square'%3E%3Cpath d='M1,15 1,1 15,1'/%3E%3Cpath d='M17,1 31,1 31,15'/%3E%3Cpath d='M1,17 1,31 15,31'/%3E%3Cpath d='M31,17 31,31 17,31'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Upstream's wood-grain diagonal stripe + red vignette -> the parent dashboard's plain blue glow. */
+body {
+  background:
+    radial-gradient(1100px 520px at 60% -180px, var(--page-glow), transparent 70%),
+    var(--page);
+  background-attachment: fixed;
+}
+
+/* Side nav -> a slim top tab strip: the parent dashboard already has its own left sidebar (with a
+   "Bots" entry), so squidbots' own left nav next to it read as two sidebars stacked side by side,
+   eating most of the iframe's width. Reusing dashboard.css's own phone layout (a horizontal bar)
+   would work but its icon-only bottom-bar style doesn't fit a desktop admin tool, so this is a
+   small custom override instead: same nav-link elements, just laid out in a row above the topbar,
+   with the branding block hidden (redundant with the parent's own "Bots" nav entry). */
+.app { display: block; }
+.side {
+  position: sticky; top: 0; z-index: 5; height: auto; width: auto; overflow: visible;
+  flex-direction: row; align-items: center; flex-wrap: wrap; gap: 2px;
+  padding: 10px 8px; margin-bottom: 4px;
+  background: var(--surface); border-right: 0; border-bottom: 1px solid var(--border);
+  box-shadow: none;
+}
+.brand { display: none; }
+.nav-link { padding: 7px 14px; }
+.nav-link:hover { background: var(--surface-2); border-color: transparent; }
+.nav-link[aria-current="page"] {
+  background: rgba(74, 163, 255, .16);
+  border-color: transparent;
+  box-shadow: inset 0 -2px 0 var(--gold-bright);
+}
+.ico { background-color: var(--surface-2); border: 1px solid var(--hairline); box-shadow: none; }
+
+/* Buttons: the parent dashboard's blue pill, not the red bevelled one. */
+.btn, button.ghost, button.primary {
+  font-weight: 600; letter-spacing: 0; text-shadow: none; color: var(--text-primary);
+  border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border);
+  box-shadow: none;
+}
+.btn:hover, button.ghost:hover, button.primary:hover { filter: none; color: #fff; border-color: var(--gold); }
+button.primary {
+  background: linear-gradient(180deg, #5bb6ff, #2f8ee0); border-color: transparent; color: #04121f;
+}
+button.primary:hover { background: linear-gradient(180deg, #75c4ff, #3f9aef); }
+
+/* Inputs: upstream's own warm brown/gold input box (#0a0805, sharp 2px corners, inset shadow) ->
+   the parent dashboard's flatter blue-grey field, same recipe as its own #cfg-find-input etc. */
+input, select {
+  border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-primary); box-shadow: none;
+}
+input:focus, select:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(74, 163, 255, .18); }
+
+/* Cards: dropped the gold/blue corner-bracket frame tried earlier -- next to the parent
+   dashboard's OTHER main tabs (Sidekick, Configs, Consoles, ...), which all use a plain bordered
+   rounded panel, the corner-bracket look stood out as its own thing rather than fitting in. This
+   now matches the parent dashboard's own .card rule exactly (index.html: background var(--panel),
+   border 1px solid var(--border), border-radius 18px, box-shadow var(--shadow)). */
+.card, .figure {
+  background: var(--surface); border-color: var(--border); border-radius: 18px; box-shadow: var(--shadow);
+}
+.card::before { display: none; }
+
+.banner { background: rgba(224, 90, 74, .12); border-color: rgba(224, 90, 74, .35); }
+
+.tabs { background: var(--surface-2); }
+.tabs button[aria-selected="true"] {
+  background: rgba(74, 163, 255, .22); text-shadow: none;
+}
+
+/* Upstream's own .page has max-width:1400px but no margin:auto (it's meant to sit flush against
+   the side nav, not stand alone) -- left as-is every page pins to the left edge with dead space
+   on the right in whatever width the iframe ends up with, once the side nav became a top strip
+   above (see .app/.side overrides). margin:auto here is plain CSS, so every page re-centers on
+   its own whenever the parent dashboard's sidebar is toggled and the iframe (and so this page)
+   resizes -- no JS needed for that part. Applies to all pages (world, bots, gear, stats, chat,
+   settings); the gear-specific rule below just widens that one page further. */
+.page { margin: 0 auto; }
+
+/* ---------- Armory tab (local-only: Armory-style view + item picker, calls the parent
+   dashboard's API on 127.0.0.1:8877 since only it has console/mail access -- see
+   dashboard_squidbots_module memory) ---------- */
+.ico[data-icon="gear"]::before { content: "🛡"; }
+.page[data-page="gear"] { max-width: 1900px; }
+/* Lives as a static child of .armory-panel (index.html), after #gearBody -- so it sits, centred,
+   right below the Main Hand/Off Hand/Ranged row every bot load redraws, instead of floating above
+   the panel in its own differently-styled box. Kept as a permanent element outside #gearBody
+   (which gearLoad() fully replaces on every load) so its event listeners, bound once in
+   local-gear.js, are never torn down.
+   Row = the name-search box plus the "All characters" button that opens the paginated browse-all
+   modal (#gearBrowsePicker, index.html) next to it. .gear-search-input is the positioning context
+   for the live-typing dropdown (.results); it, not the row, needs position:relative so the
+   dropdown doesn't stretch under the button too. */
+.gear-search-wrap { display: flex; gap: 10px; max-width: 560px; margin: 22px auto 0; }
+.gear-search-input { position: relative; flex: 1; min-width: 0; }
+#gearBrowseOpen { white-space: nowrap; }
+/* The wrapper's max-width reserves the centred space, but the <input> itself defaults to the
+   browser's intrinsic ~20-character width and sits flush left inside that space -- so it needs
+   its own width:100% to actually fill (and so visually centre in) the wrapper. Bumped padding/
+   font-size a little too, matching the "a bit bigger" ask. */
+.gear-search-input input { width: 100%; box-sizing: border-box; padding: 10px 14px; font-size: 14px; }
+.gear-search-input .results { position: absolute; top: 100%; left: 0; right: 0; width: auto; margin-top: 4px; }
+.results button:hover { background: rgba(74, 163, 255, .12); }
+.gear-search-input .results button.active { background: rgba(74, 163, 255, .16); }
+.gear-search-input .results-empty, .browse-results-empty { padding: 10px 12px; color: var(--text-muted); font-size: 12.5px; }
+
+/* "All characters" browse-all modal (#gearBrowsePicker): a 4-per-row card grid (100 rows/page, see
+   list_characters() in dashboard_server.py) instead of the live-typing dropdown's plain single-
+   column list -- there's a lot more room to work with in a modal than under a text field, and
+   with 100 rows a page a grid reads faster than one long column. Wider modal to fit 4 comfortably. */
+#gearBrowsePicker .modal-box { max-width: 980px; }
+.browse-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.browse-filters input[type="number"] { width: 100px; }
+.browse-filters select { flex: 1; min-width: 140px; }
+#gearBrowseResults {
+  max-height: 60vh; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+@media (max-width: 900px) { #gearBrowseResults { grid-template-columns: repeat(2, 1fr); } }
+#gearBrowseResults button {
+  display: flex; flex-direction: column; gap: 5px; text-align: left; font: inherit; cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 14px; color: var(--text-primary);
+}
+#gearBrowseResults button:hover { background: rgba(74, 163, 255, .12); border-color: var(--gold); }
+#gearBrowseResults .browse-row-top { font-size: 18px; display: flex; align-items: center; gap: 8px; }
+#gearBrowseResults .race-icon { width: 30px; height: 30px; border-radius: 5px; object-fit: cover; flex: none; }
+#gearBrowseResults .browse-row-tags { display: flex; gap: 6px; align-self: flex-start; }
+#gearBrowseResults .meta { font-size: 14px; }
+
+/* Bot vs. real-player badge, shown in search results and the Armory header; alliance/horde badge
+   next to it in the browse-all panel, coloured with the same --alliance/--horde vars the rest of
+   the app (roster faction dots, faction charts) already uses. */
+.tag { font-size: 10px; padding: 2px 7px; border-radius: 999px; text-transform: uppercase; letter-spacing: .3px; font-weight: 600; }
+.tag-bot { background: rgba(74, 163, 255, .16); color: var(--gold-bright); }
+.tag-player { background: rgba(53, 179, 106, .18); color: var(--good); }
+.tag-alliance { background: rgba(57, 135, 229, .18); color: var(--alliance); }
+.tag-horde { background: rgba(224, 90, 74, .18); color: var(--horde); }
+
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 210; background: rgba(6, 7, 9, .8);
+  display: none; align-items: center; justify-content: center; padding: 24px;
+}
+.modal-overlay:not([hidden]) { display: flex; }
+.modal-box {
+  width: 100%; max-width: 640px; max-height: 84vh; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+  padding: 20px 22px; box-shadow: var(--shadow);
+}
+/* Paperdoll panel: same plain bordered panel as every other card in the app (matches the parent
+   dashboard's own .card: border 1px solid var(--border), border-radius 18px, box-shadow
+   var(--shadow)) -- only the portrait box inside it (.armory-model, below) keeps the square
+   blue corner-bracket frame, since that's specifically about framing the character image, not
+   the whole tab. */
+.armory-panel {
+  position: relative; margin: 10px auto 0; padding: 26px 39px 32px; border-radius: 18px; max-width: 1816px;
+  background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.armory-cols { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 34px; }
+.armory-col { display: flex; flex-direction: column; gap: 7px; min-width: 300px; max-width: 372px; flex: 1; }
+.armory-center { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 384px; flex: 0 0 auto; }
+.armory-name { font-family: var(--display); font-weight: 700; font-size: 30px; }
+.armory-pills { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.armory-pill {
+  font-size: 15px; padding: 6px 14px; border-radius: 999px; background: var(--surface-2);
+  border: 1px solid var(--border); color: var(--text-secondary); text-transform: capitalize;
+}
+/* Height is set inline by gearSizeModel() in local-gear.js, measured against the actual
+   rendered bottom of the item columns -- pure-CSS flex stretch couldn't be made to land the
+   portrait's bottom edge exactly on Wrist/Trinket 2 reliably, JS measurement can. This value is
+   just the pre-measurement fallback shown for one frame. */
+.armory-model {
+  width: 100%; max-width: 670px; height: 460px; background: rgba(0,0,0,.3);
+  border: 1px solid rgba(74,163,255,.15); position: relative; overflow: hidden;
+}
+.armory-model::before {
+  content: ""; position: absolute; inset: 5px; border: 1px solid rgba(74,163,255,.14); pointer-events: none;
+}
+.armory-model::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  border: 18px solid transparent;
+  border-image-source: var(--corner-svg);
+  border-image-slice: 16;
+  border-image-width: 18px;
+  border-image-repeat: stretch;
+}
+/* cover (not contain): a portrait image fills the box completely, no letterboxing -- some
+   cropping at the sides is fine for a bust/full-body character piece, matches how a profile
+   picture normally gets framed. */
+.armory-portrait { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: none; }
+.armory-model-fallback {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 20px; font-size: 13px; color: var(--text-muted);
+}
+.armory-weapons { display: flex; gap: 14px; max-width: 718px; margin: 18px auto 0; }
+.armory-weapons .armory-slot { flex: 1; }
+.armory-slot {
+  display: flex; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--surface); cursor: pointer;
+}
+.armory-slot:hover { border-color: var(--gold); background: var(--surface-2); }
+.armory-slot .icon {
+  width: 46px; height: 46px; border-radius: 5px; border: 1px solid var(--border); flex: none;
+  background: var(--surface-2) center/cover no-repeat;
+}
+.armory-slot .label { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .4px; }
+.armory-slot .item-name { font-size: 16px; font-weight: 600; }
+.armory-slot .item-name.empty { color: var(--text-muted); font-weight: 400; }
+.gq0 { color: #9d9d9d; } .gq1 { color: #fff; } .gq2 { color: #1eff00; } .gq3 { color: #0070dd; }
+.gq4 { color: #a335ee; } .gq5 { color: #ff8000; }
+
+/* Bots tab: "show offline" toggle next to the roster sort tabs, and dimming offline rows once
+   the toggle turns them on -- offline bots have no live health/task data, so the row would
+   otherwise look identical to a stalled online one. */
+.roster-offline-toggle {
+  display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary);
+  cursor: pointer; user-select: none; margin-left: auto;
+}
+.roster-offline-toggle input { cursor: pointer; }
+#roster tr.offline { opacity: .55; }
+#roster tr.offline:hover { opacity: .8; }
