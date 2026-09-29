@@ -1,6 +1,8 @@
 # Descension Dashboard
 This tool is a dashboard for server admins. It comes with a way to start, stop and restart MySQL, Authserver and Worldserver, it also includes  SquidBots Dashboard, a Live map where you can TP where you right click, Show WF and bot/player locations. It has built in Sidekick and you can attach DB.Exile as well. You can controll accounts, add items + add items to favorite for easy access and even make kits. You can see and control bans/mutes, tickets and alter realmlist data, and lastly it includes a built in lua script editor with a list of all your configs.
 
+If you don't have Python, open the dashboard with the .exe, if you do have python and rather open it through a console cmd type window, use the .bat file.
+
 Full Feature list:
 - Dashboard to start/stop MySQL, Authserver, Worldserver + Worldserver Realm2 if you have 2 realms.
 - Consoles for each of the above.
