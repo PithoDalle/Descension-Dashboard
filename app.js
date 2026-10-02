@@ -186,6 +186,13 @@ async function refreshStatus() {
       card.innerHTML = `
         <div class="top">
           <span class="label">${svcIcon(key)}&nbsp; ${key === "mysql" && svc.label === "MySQL" ? '<span class="my-my">My</span><span class="my-sql">SQL</span>' : svc.label}</span>
+          <label class="autostart" title="Start this service automatically when the dashboard launches">
+            <span class="autostart-switch">
+              <input type="checkbox" data-autostart="${key}" ${svc.auto_start ? "checked" : ""}>
+              <span class="slider"></span>
+            </span>
+            Auto start
+          </label>
         </div>
         <div class="status-text">
           <span class="dot ${svc.running ? "on" : "off"}"></span>${svc.running ? "Running" : "Stopped"}
@@ -203,6 +210,26 @@ async function refreshStatus() {
       `;
       wrap.appendChild(card);
     }
+    wrap.querySelectorAll("input[data-autostart]").forEach((cb) => {
+      cb.addEventListener("change", async () => {
+        const service = cb.dataset.autostart;
+        cb.disabled = true;
+        try {
+          const res = await fetch(`/api/autostart?service=${service}`, {
+            method: "POST", headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ enabled: cb.checked }),
+          });
+          const data = await res.json();
+          if (data.error) { toast("Error: " + data.error); cb.checked = !cb.checked; }
+          else toast(`${service}: auto start ${cb.checked ? "on" : "off"}`);
+        } catch (e) {
+          toast("Request failed");
+          cb.checked = !cb.checked;
+        } finally {
+          cb.disabled = false;
+        }
+      });
+    });
     wrap.querySelectorAll("button[data-action]").forEach((b) => {
       b.addEventListener("click", async () => {
         const action = b.dataset.action;
@@ -835,6 +862,7 @@ async function loadSettings() {
   $("#set-mysql_password").value = s.mysql_password || "";
   $("#set-exilesdb_path").value = s.exilesdb_path || "";
   $("#set-exilesdb_port").value = s.exilesdb_port || "8081";
+  $("#set-launch_mode").value = s.launch_mode || "bat";
 }
 
 $("#btn-save-settings").addEventListener("click", async () => {
@@ -853,6 +881,7 @@ $("#btn-save-settings").addEventListener("click", async () => {
     mysql_password: $("#set-mysql_password").value,
     exilesdb_path: $("#set-exilesdb_path").value.trim(),
     exilesdb_port: $("#set-exilesdb_port").value.trim() || "8081",
+    launch_mode: $("#set-launch_mode").value,
   };
   const res = await fetch("/api/settings", {
     method: "POST",

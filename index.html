@@ -83,6 +83,15 @@
   }
   .card .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .card .label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; display: flex; align-items: center; }
+
+  .autostart { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-dim); white-space: nowrap; }
+  .autostart-switch { position: relative; display: inline-block; width: 30px; height: 17px; flex-shrink: 0; }
+  .autostart-switch input { opacity: 0; width: 0; height: 0; }
+  .autostart-switch .slider { position: absolute; inset: 0; background: var(--panel-2); border: 1px solid var(--border); border-radius: 17px; cursor: pointer; transition: background .15s ease; }
+  .autostart-switch .slider::before { content: ""; position: absolute; width: 13px; height: 13px; left: 2px; top: 1px; background: var(--text-dim); border-radius: 50%; transition: transform .15s ease, background .15s ease; }
+  .autostart-switch input:checked + .slider { background: var(--accent); border-color: var(--accent); }
+  .autostart-switch input:checked + .slider::before { transform: translateX(13px); background: #fff; }
+  .autostart-switch input:disabled + .slider { opacity: .5; cursor: default; }
   .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 6px; }
   .dot.on { background: var(--green); box-shadow: 0 0 8px var(--green); }
   .dot.off { background: var(--red); }
@@ -265,11 +274,11 @@
 
   .settings-form { max-width: 640px; display: flex; flex-direction: column; gap: 16px; }
   .field label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
-  .field input {
+  .field input, .field select {
     width: 100%; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
     padding: 10px 12px; color: var(--text); font-size: 13px; outline: none;
   }
-  .field input:focus { border-color: var(--accent); }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
   .path-row { display: flex; gap: 8px; }
   .path-row input { flex: 1; min-width: 0; }
   .path-row button { flex: none; white-space: nowrap; }
@@ -795,6 +804,13 @@
           <label>MySQL password</label>
           <input type="password" id="set-mysql_password">
         </div>
+      </div>
+      <div class="field">
+        <label>Launch services via</label>
+        <select id="set-launch_mode">
+          <option value="bat">.bat launcher (console title/color, Authserver waits for MySQL)</option>
+          <option value="exe">.exe directly (skips the .bat wrapper entirely)</option>
+        </select>
       </div>
       <div id="set-exilesdb-group" style="display:none">
         <div class="field">

@@ -61,6 +61,10 @@ DEFAULT_SETTINGS = {
     "worldserver_exe": "",
     # A second realm's worldserver.exe, wherever it lives; empty = feature hidden entirely.
     "worldserver2_exe": "",
+    # "bat" (default) = launch via the .bat wrapper (console title/color, MySQL wait-for-port
+    # logic on Authserver). "exe" = os.startfile the service's own .exe directly, skipping
+    # the wrapper entirely -- for installs that don't have (or don't want) the .bat files.
+    "launch_mode": "bat",
 }
 
 MODULE_CONFIGS = [
@@ -84,12 +88,54 @@ def load_settings():
 
 def save_settings(settings):
     clean = {k: settings.get(k, DEFAULT_SETTINGS[k]) for k in DEFAULT_SETTINGS}
+    # Merge onto the file's raw contents (not just DEFAULT_SETTINGS) so extra
+    # top-level keys that live in the same file but aren't part of the normal
+    # settings form -- e.g. "auto_start" -- survive an ordinary Settings-page save.
+    raw = {}
+    if os.path.exists(SETTINGS_PATH):
+        try:
+            with open(SETTINGS_PATH, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+        except Exception:
+            raw = {}
+    raw.update(clean)
     with open(SETTINGS_PATH, "w", encoding="utf-8") as f:
-        json.dump(clean, f, indent=2)
+        json.dump(raw, f, indent=2)
     return clean
 
 
+def load_auto_start():
+    """Per-service auto-start flags, stored under the "auto_start" key in the
+    same dashboard_settings.json file but kept out of DEFAULT_SETTINGS/
+    save_settings' key set so it isn't clobbered by the generic Settings-page
+    save. Defaults to off for every service."""
+    if os.path.exists(SETTINGS_PATH):
+        try:
+            with open(SETTINGS_PATH, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+            val = raw.get("auto_start")
+            if isinstance(val, dict):
+                return {k: bool(v) for k, v in val.items()}
+        except Exception:
+            pass
+    return {}
+
+
+def save_auto_start(auto_start):
+    raw = {}
+    if os.path.exists(SETTINGS_PATH):
+        try:
+            with open(SETTINGS_PATH, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+        except Exception:
+            raw = {}
+    raw["auto_start"] = auto_start
+    with open(SETTINGS_PATH, "w", encoding="utf-8") as f:
+        json.dump(raw, f, indent=2)
+
+
 SETTINGS = load_settings()
+AUTO_START = load_auto_start()
 
 
 def _load_optional_module(name):
@@ -294,7 +340,17 @@ def service_running(key: str) -> bool:
 def start_service(key: str):
     """Launch a service exactly like double-clicking its .bat: its own real
     console window, no redirected stdio. AzerothCore's CLI reader needs a
-    real console -- redirecting it is what causes silent shutdowns/hangs."""
+    real console -- redirecting it is what causes silent shutdowns/hangs.
+
+    With launch_mode == "exe", skips the .bat wrapper and os.startfile()s the
+    service's own .exe directly instead (still its own real console window --
+    os.startfile behaves the same for a .exe as double-clicking it). Loses the
+    .bat's console title/color and Authserver's wait-for-MySQL-port logic, but
+    needs nothing but the .exe to exist."""
+    if SETTINGS.get("launch_mode") == "exe":
+        exe = _service_exe_path(key)
+        os.startfile(exe, cwd=os.path.dirname(exe))
+        return
     os.startfile(services()[key]["start_script"])
 
 
@@ -1904,7 +1960,8 @@ class Handler(BaseHTTPRequestHandler):
             result = {}
             for key, svc in services().items():
                 pid = get_pid(svc["process"], svc.get("exe"))
-                entry = {"label": svc["label"], "running": pid is not None}
+                entry = {"label": svc["label"], "running": pid is not None,
+                         "auto_start": bool(AUTO_START.get(key, False))}
                 if pid is not None:
                     cpu, ram = get_process_health(key, pid)
                     entry["cpu_percent"] = cpu
@@ -2160,6 +2217,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             try:
                 start_service(key)
+                MANUAL_STOPPED.discard(key)
                 self._json({"ok": True})
             except Exception as e:
                 self._json({"error": str(e)}, 500)
@@ -2172,6 +2230,7 @@ class Handler(BaseHTTPRequestHandler):
                 return
             try:
                 stop_service(key)
+                MANUAL_STOPPED.add(key)  # a deliberate Stop -- the watchdog must not auto-restart this
                 self._json({"ok": True})
             except Exception as e:
                 self._json({"error": str(e)}, 500)
@@ -2182,11 +2241,15 @@ class Handler(BaseHTTPRequestHandler):
             if key not in services():
                 self._json({"error": "unknown service"}, 400)
                 return
+            RESTARTING.add(key)  # the stop-then-start gap below must not look like a crash to the watchdog
             try:
                 restart_service(key)
+                MANUAL_STOPPED.discard(key)
                 self._json({"ok": True})
             except Exception as e:
                 self._json({"error": str(e)}, 500)
+            finally:
+                RESTARTING.discard(key)
             return
 
         if path == "/api/input":
@@ -2242,6 +2305,21 @@ class Handler(BaseHTTPRequestHandler):
                     data.get("mysql_dir", ""), data.get("mysql_host", "127.0.0.1"),
                     data.get("mysql_port", "3306"), data.get("mysql_user", ""), data.get("mysql_password", ""),
                 ))
+            except Exception as e:
+                self._json({"error": str(e)}, 500)
+            return
+
+        if path == "/api/autostart":
+            global AUTO_START
+            key = qs.get("service", [""])[0]
+            if key not in services():
+                self._json({"error": "unknown service"}, 400)
+                return
+            try:
+                data = json.loads(body.decode("utf-8"))
+                AUTO_START[key] = bool(data.get("enabled"))
+                save_auto_start(AUTO_START)
+                self._json({"ok": True, "auto_start": AUTO_START})
             except Exception as e:
                 self._json({"error": str(e)}, 500)
             return
@@ -2410,12 +2488,75 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
 
+def run_auto_start():
+    """Starts every service flagged auto_start=True that isn't already running,
+    in a fixed mysql -> auth/world order. Only matters for launch_mode "exe"
+    (no .bat wrapper): the .bat wrapper already waits for MySQL's port itself,
+    but starting mysql first and giving it a couple seconds' head start is
+    cheap insurance either way, so it always runs in this order regardless of
+    launch_mode. Runs on a background thread so it never delays the dashboard
+    opening in the browser."""
+    order = ["mysql", "auth", "world", "world2"]
+    svcs = services()
+    keys = [k for k in order if k in svcs] + [k for k in svcs if k not in order]
+    for key in keys:
+        if not AUTO_START.get(key):
+            continue
+        if service_running(key):
+            continue
+        try:
+            start_service(key)
+        except Exception as e:
+            print(f"Auto-start of '{key}' failed: {e}", flush=True)
+        if key == "mysql":
+            time.sleep(2)
+
+
+# Crash watchdog: tracks, per service, the moment it was first seen down while
+# flagged auto_start -- WATCHDOG_DOWN_SINCE.pop(key) on any manual stop/restart
+# keeps that action from being mistaken for a crash. MANUAL_STOPPED marks a
+# service the user stopped on purpose, so the watchdog leaves it alone until
+# they start/restart it again; RESTARTING marks one mid-restart so the brief
+# stop-then-start window in restart_service() isn't treated as a crash either.
+WATCHDOG_INTERVAL = 3
+WATCHDOG_DELAY = 20
+WATCHDOG_DOWN_SINCE = {}
+MANUAL_STOPPED = set()
+RESTARTING = set()
+
+
+def watchdog_loop():
+    while True:
+        try:
+            for key in services():
+                if not AUTO_START.get(key) or key in MANUAL_STOPPED or key in RESTARTING:
+                    WATCHDOG_DOWN_SINCE.pop(key, None)
+                    continue
+                if service_running(key):
+                    WATCHDOG_DOWN_SINCE.pop(key, None)
+                    continue
+                first_seen = WATCHDOG_DOWN_SINCE.setdefault(key, time.monotonic())
+                if time.monotonic() - first_seen >= WATCHDOG_DELAY:
+                    print(f"Watchdog: '{key}' has been down {WATCHDOG_DELAY}s, auto-restarting", flush=True)
+                    try:
+                        start_service(key)
+                    except Exception as e:
+                        print(f"Watchdog restart of '{key}' failed: {e}", flush=True)
+                    WATCHDOG_DOWN_SINCE.pop(key, None)
+        except Exception as e:
+            print(f"Watchdog loop error: {e}", flush=True)
+        time.sleep(WATCHDOG_INTERVAL)
+
+
 def main():
     port = 8877
     server = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     url = f"http://127.0.0.1:{port}/"
     print(f"AzerothCoreCOA dashboard running at {url}")
     print("Close this window to stop the dashboard (services keep running).")
+    if any(AUTO_START.values()):
+        threading.Thread(target=run_auto_start, daemon=True).start()
+    threading.Thread(target=watchdog_loop, daemon=True).start()
     try:
         webbrowser.open(url)
     except Exception:
